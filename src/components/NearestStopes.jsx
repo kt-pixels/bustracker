@@ -99,7 +99,7 @@ function NearestStopes() {
     );
     const busPositions = await response.json();
 
-    console.log(busPositions);
+    // console.log(busPositions);
 
     for (const stop of nearbyStops) {
       if (stop.geometry && stop.geometry.coordinates) {
@@ -135,7 +135,7 @@ function NearestStopes() {
     return nearbyStopsWithBuses;
   }
 
-  console.log(busInfo);
+  // console.log(busInfo);
 
   return (
     <div>
