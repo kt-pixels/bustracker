@@ -91,12 +91,13 @@ function NearestStopes() {
     const nearbyStops = findNearbyStops(userLat, userLong);
     const nearbyStopsWithBuses = [];
 
+    const apiEndpoint = 'https://transbus.opendevlabs.com/agency/301/avlapi/public/latest.geojson'
+    const encodedUrl = encodeURIComponent(apiEndpoint)
+    const url = `https://ubsa.in/smartprogrammers/fire.php?url=${encodedUrl}`
+
     // Fetch current bus positions
-    const cors_api = "http://localhost:8080/";
-    const response = await fetch(
-      cors_api +
-        "https://transbus.opendevlabs.com/agency/301/avlapi/public/latest.geojson"
-    );
+    // const cors_api = "http://localhost:8080/";
+    const response = await fetch(url);
     const busPositions = await response.json();
 
     // console.log(busPositions);
