@@ -3,22 +3,15 @@ import ReactDOM from 'react-dom/client'
 import App from './App.jsx'
 import './index.css'
 import { Route, RouterProvider, createBrowserRouter, createRoutesFromElements } from 'react-router-dom'
+import StopsData from './components/StopsData.jsx'
 import NearestStopes from './components/NearestStopes.jsx'
-// import BusTracker from './Components/BusRoutes.jsx'
-// import GetStops from './Components/GetStops.jsx'
-// import BusMap from './Components/BusDirection.jsx'
 
-// import Bus from './Components/Bus.jsx'
 
 const router = createBrowserRouter(
   createRoutesFromElements(
     <Route>
-      {/* <Route path='/' element={<BusTracker />} /> */}
-      {/* <Route path='/' element={<Bus />} /> */}
-
-      {/* <Route path='/' element={<GetStops />} /> */}
-      {/* <Route path='/' element={<BusMap />} /> */}
-      <Route path='/' element={<NearestStopes />} />
+      <Route path='/' element={<StopsData />} />
+      <Route path='/near' element={<NearestStopes />} />
     </Route>
   )
 )

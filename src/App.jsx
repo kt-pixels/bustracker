@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { stopsData, routsData, allBuses } from "./AllData";
+// import { stopsData, routsData, allBuses } from "./AllData";
 
 function App() {
   const [distanceCheck, setDistanceCheck] = useState(false);

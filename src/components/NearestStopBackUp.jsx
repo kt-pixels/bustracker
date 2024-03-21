@@ -64,6 +64,12 @@ function NearestStopes() {
   // GET THE NEAREST STOPS ACCORDING TO THE USER LOCATION
   async function findNearbyStops(userLat, userLong) {
     const nearbyStops = [];
+
+    const apiEndpoint = 'https://transbus.opendevlabs.com/agency/301/avlapi/stops.geojson'
+    const encodedUrl = encodeURIComponent(apiEndpoint)
+    const url = `https://ubsa.in/smartprogrammers/fire.php?url=${encodedUrl}`
+
+    
     for (const stop of stopsData) {
       if (stop.geometry && stop.geometry.coordinates) {
         const stopLat = stop.geometry.coordinates[0]; // Latitude comes second

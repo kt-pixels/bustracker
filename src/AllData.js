@@ -12,97 +12,9 @@ export const stopsData =
         hasInfoPanel: false,
       },
       geometry: { type: "Point", coordinates: [26.81406, 45.14787] },
-    },
-    {
-      type: "Feature",
-      properties: {
-        id: "BZ02",
-        pk: 4740,
-        popupContent: "A.C.R. - Maxi Farma",
-        name: "A.C.R. - Maxi Farma",
-        hasInfoPanel: false,
-      },
-      geometry: {
-        type: "Point",
-        coordinates: [26.814334272025906, 45.147901491207215],
-      },
-    },
-    {
-      type: "Feature",
-      properties: {
-        id: "BZ03",
-        pk: 4741,
-        popupContent: "Agrana",
-        name: "Agrana",
-        hasInfoPanel: false,
-      },
-      geometry: { type: "Point", coordinates: [26.83985, 45.13485] },
-    },
-    {
-      type: "Feature",
-      properties: {
-        id: "BZ228",
-        pk: 4953,
-        popupContent: "Agrosem",
-        name: "Agrosem",
-        hasInfoPanel: true,
-      },
-      geometry: {
-        type: "Point",
-        coordinates: [26.82970721537803, 45.13472230012396],
-      },
-    },
-    {
-      type: "Feature",
-      properties: {
-        id: "bz1427",
-        pk: 4849,
-        popupContent: "Albe\u0219ti - Intersec\u021bie",
-        name: "Albe\u0219ti - Intersec\u021bie",
-        hasInfoPanel: false,
-      },
-      geometry: {
-        type: "Point",
-        coordinates: [26.92625994098164, 44.98903446865202],
-      },
-    },
-    
+    },    
   ];
 
-// https://transbus.opendevlabs.com/agency/301/avlapi/public/latest.geojson?route=${route}
-
-export const routsData = [
-  {
-    type: "FeatureCollection",
-    features: [
-      {
-        type: "Feature",
-        properties: {
-          speed: 0,
-          accuracy: null,
-          gps_timestamp: "2024-03-13T12:41:52Z",
-          route: "3",
-          bearing: 1,
-          isOnline: true,
-          license_plate: "BZ11HSU",
-          vehicle_type: 3,
-        },
-        geometry: {
-          type: "Point",
-          coordinates: [26.8172550201, 45.1560134888, 100.8],
-        },
-      },
-    ],
-  },
-];
-
-// https://transbus.opendevlabs.com/agency/301/gtfs/route/213/trips/
-
-export const tripsData = [{ success: false, err_msg: "Cerere invalida" }];
-
-//https://transbus.opendevlabs.com/agency/301/gtfs/route/213/trips/72721/
-
-export const givingTrips = [{ success: false, err_msg: "Cerere invalida" }];
 
 // https://transbus.opendevlabs.com/agency/301/avlapi/public/latest.geojson
 
@@ -131,7 +43,8 @@ export const allBuses = [
   },
 ];
 
-// Routes
+// ALL Routes
+// https://transbus.opendevlabs.com/agency/301/avlapi/routes/
 
 const routes = [
   {
