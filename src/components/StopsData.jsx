@@ -280,7 +280,7 @@ function StopsData() {
               </option>
             ))
           ) : (
-            <option defaultValue="Please Wait..."></option>
+            <option defaultValue="Please Wait...">Please Wait...</option>
           )
         ) : (
           <option disabled>Please wait...</option>
@@ -300,7 +300,7 @@ function StopsData() {
             ))
           ) : (
             <option defaultValue="Make Sure Your Location Is On?">
-              
+              Make Sure Your Location Is On?
             </option>
           )
         ) : (
