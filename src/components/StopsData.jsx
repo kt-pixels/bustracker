@@ -120,7 +120,7 @@ function StopsData() {
   const handleStopClick = (stopId) => {
     const selectedStop = stopData.find((stop) => stop.properties.id === stopId);
     if (selectedStop) {
-      setSelectedStop([selectedStop]); // Set selectedStop here
+      setSelectedStop(selectedStop); // Set selectedStop here
       const stopName = selectedStop.properties.name;
       const stopRoutes = routesData.filter((route) => {
         return (
@@ -280,7 +280,7 @@ function StopsData() {
               </option>
             ))
           ) : (
-            <option disabled selected>Please Wait...</option>
+            <option defaultValue="Please Wait..."></option>
           )
         ) : (
           <option disabled>Please wait...</option>
@@ -299,8 +299,8 @@ function StopsData() {
               </option>
             ))
           ) : (
-            <option disabled selected>
-              Make Sure Your Location Is On?
+            <option defaultValue="Make Sure Your Location Is On?">
+              
             </option>
           )
         ) : (
@@ -310,11 +310,11 @@ function StopsData() {
         )}
       </select>
       <h1>Nearest Bus Details</h1>
-      {
+      {/* {
         selectedStop.map((name, index) => (
           <div key={index} style={{display: "flex", alignItems: "baseline", gap: 10}}><h3>Stop Name:</h3> <p>{name.properties.name}</p></div>
         ))
-      } 
+      }  */}
       {nearestBus ? (
         <div>
           <p>Route: {nearestBus.properties.route}</p>
