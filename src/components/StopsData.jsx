@@ -10,44 +10,66 @@ function StopsData() {
   const [estimatedTime, setEstimatedTime] = useState(null);
   const [selectedStop, setSelectedStop] = useState(selectedStopRoutes);
 
-  // useEffect(() => {
-  //   console.log("useEffect triggered");
-  //   GetStopsData();
-  //   GetRoutesData();
-  //   GetBusesData();
-  
-  //   const interval = setInterval(() => {
-  //     console.log("Interval triggered");
-  //     console.log("Nearest bus:", nearestBus);
-  //     console.log("Selected stop:", selectedStop);
-  //     if (nearestBus && selectedStop.geometry && selectedStop.geometry.coordinates) {
-  //       handleStopClickBuses(selectedStop.geometry.coordinates);
-  //     }
-  //   }, 10000);
+  // GET THE USER CURRENT LOCATION
+  const [userLatitude, setUserLatitude] = useState(null);
+  const [userLongitude, setUserLongitude] = useState(null);
+
+  const geo = navigator.geolocation;
+
+  geo.getCurrentPosition(getCurrentLocation);
+
+  function getCurrentLocation(position) {
+    // const userLat = position.coords.latitude;
+    // const userLng = position.coords.longitude;
+
+    const userLat = 26.83098;
+    const userLng = 45.1348;
+
+    setUserLatitude(userLat);
+    setUserLongitude(userLng);
+
+    // Update filtered stops based on new location
+    const nearbyStops = filterNearbyStops(stopData, userLat, userLng);
+    setFilteredStops(nearbyStops);
+  }
 
   const [intervalId, setIntervalId] = useState(null);
 
-// ...
+  // ...
 
-useEffect(() => {
-  console.log("useEffect triggered");
-  GetStopsData();
-  GetRoutesData();
-  GetBusesData();
+  useEffect(() => {
+    console.log("UseEffetc is working");
+    GetStopsData();
+    GetRoutesData();
+    GetBusesData();
 
-  const runInterval = () => {
-    if (nearestBus && selectedStop.geometry && selectedStop.geometry.coordinates) {
-      handleStopClickBuses(selectedStop.geometry.coordinates);
+    if (userLatitude !== null && userLongitude !== null) {
+      const nearbyStops = filterNearbyStops(
+        stopData,
+        userLatitude,
+        userLongitude
+      );
+      setFilteredStops(nearbyStops);
     }
-  };
 
-  const interval = setInterval(runInterval, 10000);
-  setIntervalId(interval);
+    const runInterval = () => {
+      if (
+        nearestBus &&
+        selectedStop.geometry &&
+        selectedStop.geometry.coordinates
+      ) {
+        handleStopClickBuses(selectedStop.geometry.coordinates);
+      }
+    };
 
-  return () => {
-    clearInterval(intervalId);
-  };
-}, [nearestBus, selectedStop]);
+    const interval = setInterval(runInterval, 10000);
+    setIntervalId(interval);
+
+    return () => {
+      clearInterval(intervalId);
+    };
+  }, [nearestBus, selectedStop, userLatitude, userLongitude]);
+
   
 
   const GetStopsData = async () => {
@@ -108,9 +130,13 @@ useEffect(() => {
         );
       });
       setSelectedStopRoutes(stopRoutes);
-      
+
       // Check if geometry exists and has coordinates
-      if(selectedStop.geometry && selectedStop.geometry.coordinates && selectedStop.geometry.coordinates.length === 2) { 
+      if (
+        selectedStop.geometry &&
+        selectedStop.geometry.coordinates &&
+        selectedStop.geometry.coordinates.length === 2
+      ) {
         handleStopClickBuses(selectedStop.geometry.coordinates);
       } else {
         console.error("No valid coordinates found for selected stop");
@@ -119,7 +145,6 @@ useEffect(() => {
       console.error("Selected stop not found");
     }
   };
-  
 
   const handleStopClickBuses = (stopCoordinates) => {
     const nearestBus = findNearestBus(stopCoordinates);
@@ -190,58 +215,120 @@ useEffect(() => {
     return timeInMinutes;
   };
 
+  {
+    /* Function to get the next stop based on the route and direction */
+  }
+
+  const getNextStop = (route, bearing) => {
+    // Find the route data for the current route
+    const currentRoute = routesData.find(
+      (routeData) => routeData.short_name === route
+    );
+
+    // Determine the appropriate headline based on the bus's bearing
+    const headline =
+      bearing === 0 ? currentRoute.headline[0] : currentRoute.headline[1];
+
+    return headline;
+  };
+
+  // Filter stops data
+
+  const [filteredStops, setFilteredStops] = useState([]);
+  // Function to filter stops based on proximity to user's location
+  const filterNearbyStops = (
+    stops,
+    userLatitude,
+    userLongitude
+    // radius = 50
+  ) => {
+    return stops.filter((stop) => {
+      // Calculate distance between stop and user's location
+      const distanceThreshold = 1;
+      const distance = calculateDistance(
+        userLatitude,
+        userLongitude,
+        stop.geometry.coordinates[0],
+        stop.geometry.coordinates[1]
+      );
+      // Return true if the distance is within the specified radius
+      return distance <= distanceThreshold;
+    });
+  };
+
+  // Inside the useEffect hook where you fetch stop data
+  // useEffect(() => {
+  //   if (userLatitude !== null && userLongitude !== null) {
+  //     const nearbyStops = filterNearbyStops(
+  //       stopData,
+  //       userLatitude,
+  //       userLongitude
+  //     );
+  //     setFilteredStops(nearbyStops);
+  //   }
+  // }, [userLatitude, userLongitude]);
+
   return (
     <div>
-      <h2>Stops</h2>
+      <h2>All Stops</h2>
       <select onChange={(event) => handleStopClick(event.target.value)}>
-        {stopData ? (
-          stopData.map((stop) => (
-            <option key={stop.properties.id} value={stop.properties.id}>
-              {stop.properties.name}
-            </option>
-          ))
+        {stopData !== null ? (
+          stopData.length > 0 ? (
+            stopData.map((stop) => (
+              <option key={stop.properties.id} value={stop.properties.id}>
+                {stop.properties.name}
+              </option>
+            ))
+          ) : (
+            <option disabled selected>Please Wait...</option>
+          )
         ) : (
           <option disabled>Please wait...</option>
         )}
       </select>
 
-      <h1>Nearest Bus</h1>
-      {nearestBus && (
+      <br /> <br />
+
+      <h2>Stops According to your location</h2>
+      <select onChange={(event) => handleStopClick(event.target.value)}>
+        {filteredStops !== null ? (
+          filteredStops.length > 0 ? (
+            filteredStops.map((stop) => (
+              <option key={stop.properties.id} value={stop.properties.id}>
+                {stop.properties.name}
+              </option>
+            ))
+          ) : (
+            <option disabled selected>
+              Make Sure Your Location Is On?
+            </option>
+          )
+        ) : (
+          <option disabled selected>
+            Please wait...
+          </option>
+        )}
+      </select>
+      <h1>Nearest Bus Details</h1>
+      {nearestBus ? (
         <div>
-          <h2>Nearest Bus Details</h2>
           <p>Route: {nearestBus.properties.route}</p>
-          <p>Direction: {nearestBus.properties.bearing === 0 ? "Up" : "Down"}</p>
+          {/* <p>Direction: {nearestBus.properties.bearing === 0 ? "Up" : "Down"}</p> */}
+          <p>
+            Direction:{" "}
+            {getNextStop(
+              nearestBus.properties.route,
+              nearestBus.properties.bearing
+            )}
+          </p>
           <p>License Plate: {nearestBus.properties.license_plate}</p>
           <p>Distance to stop: {distance.toFixed(2)} km</p>
           <p>Estimated time to reach stop: {estimatedTime} minutes</p>
+          {/* Display the next stop based on the bus's bearing and direction names */}
         </div>
+      ) : (
+        <p>Please select any stop...</p>
       )}
-
-      <h2>Routes for Selected Stop</h2>
-      <ul>
-        {selectedStopRoutes.map((route) => (
-          <li
-            key={route.object_id}
-            onClick={() => findSelectedRouteBuses(route.short_name)}
-          >
-            {route.short_name} - {route.name}
-          </li>
-        ))}
-      </ul>
-
-      {/* <h2>Buses On This Route</h2>
-      <ul>
-        {busesData.length > 0 ? (
-          busesData.map((bus, index) => (
-            <li key={index}>
-              {bus.properties.route}{" "}
-              {bus.properties.bearing === 0 ? "Up" : "Down"}
-            </li>
-          ))
-        ) : (
-          <li>No buses available</li>
-        )}
-      </ul> */}
     </div>
   );
 }

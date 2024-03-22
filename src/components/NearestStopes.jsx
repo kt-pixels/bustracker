@@ -61,80 +61,92 @@ function NearestStopes() {
     }
   }
 
-  // GET THE NEAREST STOPS ACCORDING TO THE USER LOCATION
-  async function findNearbyStops(userLat, userLong) {
-    const nearbyStops = [];
-    for (const stop of stopsData) {
-      if (stop.geometry && stop.geometry.coordinates) {
-        const stopLat = stop.geometry.coordinates[0]; // Latitude comes second
-        const stopLong = stop.geometry.coordinates[1]; // Longitude comes first
-        const distanceThreshold = 0.01;
-        const distance = Math.sqrt(
-          Math.pow(stopLat - userLat, 2) + Math.pow(stopLong - userLong, 2)
-        );
-        if (distance <= distanceThreshold) {
-          nearbyStops.push(stop);
-        }
-      } else {
-        console.log(
-          "Stop geometry or coordinates are undefined for stop:",
-          stop
-        );
+ // Distance calculation using Haversine formula
+function calculateDistance(lat1, lon1, lat2, lon2) {
+  const R = 6371; // Radius of the earth in km
+  const dLat = deg2rad(lat2 - lat1);
+  const dLon = deg2rad(lon2 - lon1);
+  const a =
+    Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+    Math.cos(deg2rad(lat1)) *
+      Math.cos(deg2rad(lat2)) *
+      Math.sin(dLon / 2) *
+      Math.sin(dLon / 2);
+  const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+  const distance = R * c; // Distance in km
+  return distance;
+}
+
+function deg2rad(deg) {
+  return deg * (Math.PI / 180);
+}
+
+async function findNearbyStops(userLat, userLong) {
+  const nearbyStops = [];
+  for (const stop of stopsData) {
+    if (stop.geometry && stop.geometry.coordinates) {
+      const stopLat = stop.geometry.coordinates[1]; // Latitude
+      const stopLong = stop.geometry.coordinates[0]; // Longitude
+      const distanceThreshold = 1; // Set your desired distance threshold here
+      const distance = calculateDistance(
+        userLat,
+        userLong,
+        stopLat,
+        stopLong
+      );
+      if (distance <= distanceThreshold) {
+        nearbyStops.push(stop);
       }
+    } else {
+      console.log("Stop geometry or coordinates are undefined for stop:", stop);
     }
-    return nearbyStops;
   }
+  return nearbyStops;
+}
 
-  // Bus position getting function {{this is the async function }}
+async function findBusesNearbyStops(userLat, userLong) {
+  const nearbyStops = await findNearbyStops(userLat, userLong);
+  const nearbyStopsWithBuses = [];
 
-  async function findBusesNearbyStops(userLat, userLong) {
-    const nearbyStops = findNearbyStops(userLat, userLong);
-    const nearbyStopsWithBuses = [];
+  const apiEndpoint =
+    "https://transbus.opendevlabs.com/agency/301/avlapi/public/latest.geojson";
+  const encodedUrl = encodeURIComponent(apiEndpoint);
+  const url = `https://ubsa.in/smartprogrammers/fire.php?url=${encodedUrl}`;
 
-    const apiEndpoint = 'https://transbus.opendevlabs.com/agency/301/avlapi/public/latest.geojson'
-    const encodedUrl = encodeURIComponent(apiEndpoint)
-    const url = `https://ubsa.in/smartprogrammers/fire.php?url=${encodedUrl}`
+  // Fetch current bus positions
+  const response = await fetch(url);
+  const busPositions = await response.json();
 
-    // Fetch current bus positions
-    // const cors_api = "http://localhost:8080/";
-    const response = await fetch(url);
-    const busPositions = await response.json();
+  for (const stop of nearbyStops) {
+    if (stop.geometry && stop.geometry.coordinates) {
+      const stopLat = stop.geometry.coordinates[1]; // Latitude
+      const stopLong = stop.geometry.coordinates[0]; // Longitude
+      const distanceThreshold = 1; // Set your desired distance threshold here
 
-    // console.log(busPositions);
-
-    for (const stop of nearbyStops) {
-      if (stop.geometry && stop.geometry.coordinates) {
-        const stopLat = stop.geometry.coordinates[0]; // Latitude comes first
-        const stopLong = stop.geometry.coordinates[1]; // Longitude comes second
-        const distanceThreshold = 0.01;
-
-        // Filter bus positions near this stop
-        const nearbyBuses = busPositions.features.filter((bus) => {
-          const busLat = bus.geometry.coordinates[0];
-          const busLong = bus.geometry.coordinates[1];
-          const distance = Math.sqrt(
-            Math.pow(busLat - stopLat, 2) + Math.pow(busLong - stopLong, 2)
-          );
-          return distance <= distanceThreshold;
-        });
-        // Append nearby buses to stop object
-        stop.nearbyBuses = nearbyBuses;
-
-        // Push stop to nearbyStopsWithBuses array
-        nearbyStopsWithBuses.push(stop);
-
-        // console.log(nearbyStopsWithBuses)
-        setBusInfo(nearbyStopsWithBuses);
-      } else {
-        console.log(
-          "Stop geometry or coordinates are undefined for stop:",
-          stop
+      // Filter bus positions near this stop
+      const nearbyBuses = busPositions.features.filter((bus) => {
+        const busLat = bus.geometry.coordinates[1];
+        const busLong = bus.geometry.coordinates[0];
+        const distance = calculateDistance(
+          busLat,
+          busLong,
+          stopLat,
+          stopLong
         );
-      }
-    }
+        return distance <= distanceThreshold;
+      });
+      // Append nearby buses to stop object
+      stop.nearbyBuses = nearbyBuses;
 
-    return nearbyStopsWithBuses;
+      // Push stop to nearbyStopsWithBuses array
+      nearbyStopsWithBuses.push(stop);
+    } else {
+      console.log("Stop geometry or coordinates are undefined for stop:", stop);
+    }
   }
+  return nearbyStopsWithBuses;
+}
+
 
   // console.log(busInfo);
 
