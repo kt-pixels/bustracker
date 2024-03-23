@@ -20,11 +20,11 @@ function StopsData() {
   geo.getCurrentPosition(getCurrentLocation);
 
   function getCurrentLocation(position) {
-    const userLat = position.coords.latitude;
-    const userLng = position.coords.longitude;
+    // const userLat = position.coords.latitude;
+    // const userLng = position.coords.longitude;
 
-    // const userLat = 26.83098;
-    // const userLng = 45.1348;
+    const userLat = 26.83098;
+    const userLng = 45.1348;
 
     setUserLatitude(userLat);
     setUserLongitude(userLng);

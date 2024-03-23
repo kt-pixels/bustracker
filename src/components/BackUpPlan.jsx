@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from "react";
+import './StopsData.css'
 
 function StopsData() {
   const [stopData, setStopData] = useState([]);
@@ -19,11 +20,11 @@ function StopsData() {
   geo.getCurrentPosition(getCurrentLocation);
 
   function getCurrentLocation(position) {
-    // const userLat = position.coords.latitude;
-    // const userLng = position.coords.longitude;
+    const userLat = position.coords.latitude;
+    const userLng = position.coords.longitude;
 
-    const userLat = 26.83098;
-    const userLng = 45.1348;
+    // const userLat = 26.83098;
+    // const userLng = 45.1348;
 
     setUserLatitude(userLat);
     setUserLongitude(userLng);
@@ -115,10 +116,11 @@ function StopsData() {
     }
   };
 
-  const handleStopClick = (stopId) => {
+  const handleStopClick = (stopId, searchStopName) => {
     const selectedStop = stopData.find((stop) => stop.properties.id === stopId);
     if (selectedStop) {
       setSelectedStop(selectedStop); // Set selectedStop here
+      setSearchInput(searchStopName)
       const stopName = selectedStop.properties.name;
       const stopRoutes = routesData.filter((route) => {
         return (
@@ -172,7 +174,6 @@ function StopsData() {
     }
   };
 
-
   const findNearestBus = (stopCoordinates) => {
     let nearestDistance = Infinity;
     let nearestBus = null;
@@ -192,7 +193,6 @@ function StopsData() {
 
     return nearestBus;
   };
-
 
   const calculateDistance = (lat1, lon1, lat2, lon2) => {
     const R = 6371; // Radius of the Earth in kilometers
@@ -256,9 +256,51 @@ function StopsData() {
     });
   };
 
-  
+  // Search Functionality
+  const [searchInput, setSearchInput] = useState("");
+  const [filterSearchValue, setFilterSearchValue] = useState([]);
+
+  const searchStops = (e) => {
+    const keyValue = e.target.value;
+    setSearchInput(keyValue);
+
+    const filterSearchResults = stopData.filter((product) =>
+      product.properties.name.toLowerCase().includes(keyValue.toLowerCase())
+    );
+
+    setFilterSearchValue(filterSearchResults);
+  };
+
   return (
     <div>
+      <div className="main_heading">
+        <h2>Real Time Bus Tracking</h2>
+      </div>
+      <div className="searchInput_Button">
+        <h2>Search Your Stops</h2>
+        <input
+          type="text"
+          onChange={searchStops}
+          value={searchInput}
+          placeholder="Search Stops..."
+        />
+        <div className="searchResults">
+          {searchInput !== undefined && searchInput.trim() !== "" ? (
+            filterSearchValue.length > 0 ? (
+              filterSearchValue.map((stopNames, index) => (
+                <p
+                  key={index}
+                  onClick={() => handleStopClick(stopNames.properties.id, stopNames.properties.name)}
+                >
+                  {stopNames.properties.name}
+                </p>
+              ))
+            ) : (
+              <h4>No results match your search.</h4>
+            )
+          ) : null}
+        </div>
+      </div>
       <h2>All Stops</h2>
       <select onChange={(event) => handleStopClick(event.target.value)}>
         {stopData !== null ? (
@@ -296,7 +338,7 @@ function StopsData() {
           </option>
         )}
       </select>
-      <h1>Nearest Bus Details</h1>
+      <h2 className="bus_details">Nearest Bus Details</h2>
       {nearestBus ? (
         <div>
           <p>Route: {nearestBus.properties.route}</p>

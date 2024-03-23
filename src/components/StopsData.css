@@ -54,3 +54,41 @@ select{
     display: flex;
     align-items: center;
 }
+
+.allStops_data{
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: white;
+    text-align: center;
+}
+
+.allStops_data > h3{
+    background-color: black;
+    margin: 0;
+    padding: 15px;
+    color: white;
+}
+
+.allStops_data > p{
+    margin: 0;
+    padding: 10px;
+    border-bottom: 1px solid;
+}
+
+.allStops_data > .material-symbols-outlined{
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    color: white;
+}
+
+.allStops_data > input{
+    width: 90%;
+    padding: 5px;
+    margin-block-start: 5px;
+    border-radius: 10px;
+    border-color: #b9b9b9;
+}

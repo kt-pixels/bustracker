@@ -1,98 +1,197 @@
 import React, { useEffect, useState } from "react";
+import "./StopsData.css";
 
 function StopsData() {
   const [stopData, setStopData] = useState([]);
+  const [routesData, setRoutesData] = useState([]);
   const [busesData, setBusesData] = useState([]);
-  const [selectedStop, setSelectedStop] = useState(null);
-  const [nearestBuses, setNearestBuses] = useState([]);
+  const [selectedStopRoutes, setSelectedStopRoutes] = useState([]);
+  const [nearestBus, setNearestBus] = useState(null);
+  const [distance, setDistance] = useState(null);
+  const [estimatedTime, setEstimatedTime] = useState(null);
+  const [selectedStop, setSelectedStop] = useState(selectedStopRoutes);
 
+  // GET THE USER CURRENT LOCATION
   const [userLatitude, setUserLatitude] = useState(null);
   const [userLongitude, setUserLongitude] = useState(null);
 
+  const geo = navigator.geolocation;
+
+  geo.getCurrentPosition(getCurrentLocation);
+
+  function getCurrentLocation(position) {
+    // const userLat = position.coords.latitude;
+    // const userLng = position.coords.longitude;
+
+    const userLat = 26.83098;
+    const userLng = 45.1348;
+
+    setUserLatitude(userLat);
+    setUserLongitude(userLng);
+
+    // Update filtered stops based on new location
+    const nearbyStops = filterNearbyStops(stopData, userLat, userLng);
+    setFilteredStops(nearbyStops);
+  }
+
+  const [intervalId, setIntervalId] = useState(null);
+
+  // ...
+
   useEffect(() => {
-    // Fetch stop data
-    console.log("UseEffect Working")
-    const getStopData = async () => {
-      try {
-        const apiEndpoint =
-          "https://transbus.opendevlabs.com/agency/301/avlapi/stops.geojson";
-        const encodedUrl = encodeURIComponent(apiEndpoint);
-        const url = `https://ubsa.in/smartprogrammers/fire.php?url=${encodedUrl}`;
-        const response = await fetch(url);
-        const data = await response.json();
-        setStopData(data);
-      } catch (error) {
-        console.error("Error fetching stops data:", error);
-      }
-    };
+    console.log("UseEffetc is working");
+    GetStopsData();
+    GetRoutesData();
+    GetBusesData();
 
-    // Fetch buses data
-    const getBusesData = async () => {
-      try {
-        const apiEndpoint =
-          "https://transbus.opendevlabs.com/agency/301/avlapi/public/latest.geojson";
-        const encodedUrl = encodeURIComponent(apiEndpoint);
-        const url = `https://ubsa.in/smartprogrammers/fire.php?url=${encodedUrl}`;
-        const response = await fetch(url);
-        const data = await response.json();
-        setBusesData(data.features);
-      } catch (error) {
-        console.error("Error fetching buses data:", error);
-      }
-    };
-
-    getStopData();
-    getBusesData();
-
-    const geo = navigator.geolocation;
-    if (geo) {
-      geo.getCurrentPosition(getCurrentLocation);
+    if (userLatitude !== null && userLongitude !== null) {
+      const nearbyStops = filterNearbyStops(
+        stopData,
+        userLatitude,
+        userLongitude
+      );
+      setFilteredStops(nearbyStops);
     }
 
-    const interval = setInterval(updateBusesData, 10000);
+    const runInterval = () => {
+      if (
+        nearestBus &&
+        selectedStop.geometry &&
+        selectedStop.geometry.coordinates
+      ) {
+        handleStopClickBuses(selectedStop.geometry.coordinates);
+      }
+    };
 
-    return () => clearInterval(interval);
-  }, []);
+    const interval = setInterval(runInterval, 10000);
+    setIntervalId(interval);
 
-  const getCurrentLocation = (position) => {
-    setUserLatitude(position.coords.latitude);
-    setUserLongitude(position.coords.longitude);
+    return () => {
+      clearInterval(intervalId);
+    };
+  }, [nearestBus, selectedStop, userLatitude, userLongitude]);
+
+  const GetStopsData = async () => {
+    // Fetch stop data
+    try {
+      const apiEndpoint =
+        "https://transbus.opendevlabs.com/agency/301/avlapi/stops.geojson";
+      const encodedUrl = encodeURIComponent(apiEndpoint);
+      const url = `https://ubsa.in/smartprogrammers/fire.php?url=${encodedUrl}`;
+      const response = await fetch(url);
+      const result = await response.json();
+      setStopData(result);
+    } catch (error) {
+      console.error("Error fetching stops data:", error);
+    }
   };
 
-  const updateBusesData = () => {
-    if (!selectedStop || !userLatitude || !userLongitude) return;
-
-    const nearbyBuses = findNearestBuses(selectedStop);
-    setNearestBuses(nearbyBuses);
+  const GetRoutesData = async () => {
+    // Fetch routes data
+    try {
+      const apiEndpoint =
+        "https://transbus.opendevlabs.com/agency/301/avlapi/routes/";
+      const encodedUrl = encodeURIComponent(apiEndpoint);
+      const url = `https://ubsa.in/smartprogrammers/fire.php?url=${encodedUrl}`;
+      const response = await fetch(url);
+      const result = await response.json();
+      setRoutesData(result);
+    } catch (error) {
+      console.error("Error fetching routes data:", error);
+    }
   };
 
-  const findNearestBuses = (stop) => {
-    const buses = [];
-    busesData.forEach((bus) => {
+  const GetBusesData = async () => {
+    // Fetch buses data
+    try {
+      const apiEndpoint =
+        "https://transbus.opendevlabs.com/agency/301/avlapi/public/latest.geojson";
+      const encodedUrl = encodeURIComponent(apiEndpoint);
+      const url = `https://ubsa.in/smartprogrammers/fire.php?url=${encodedUrl}`;
+      const response = await fetch(url);
+      const result = await response.json();
+      setBusesData(result.features);
+    } catch (error) {
+      console.error("Error fetching buses data:", error);
+    }
+  };
+
+  const handleStopClick = (stopId, searchStopName) => {
+    const selectedStop = stopData.find((stop) => stop.properties.id === stopId);
+    if (selectedStop) {
+      setSelectedStop(selectedStop); // Set selectedStop here
+      setSearchInput(searchStopName);
+      const stopName = selectedStop.properties.name;
+      const stopRoutes = routesData.filter((route) => {
+        return (
+          route.extra_data &&
+          route.extra_data.headline &&
+          route.extra_data.headline[1].includes(stopName)
+        );
+      });
+      setSelectedStopRoutes(stopRoutes);
+
+      // Check if geometry exists and has coordinates
+      if (
+        selectedStop.geometry &&
+        selectedStop.geometry.coordinates &&
+        selectedStop.geometry.coordinates.length === 2
+      ) {
+        handleStopClickBuses(selectedStop.geometry.coordinates);
+      } else {
+        console.error("No valid coordinates found for selected stop");
+      }
+    } else {
+      console.error("Selected stop not found");
+    }
+  };
+
+  const handleStopClickBuses = (stopCoordinates) => {
+    const nearestBus = findNearestBus(stopCoordinates);
+    setNearestBus(nearestBus);
+
+    if (
+      nearestBus &&
+      nearestBus.geometry &&
+      nearestBus.geometry.coordinates &&
+      nearestBus.geometry.coordinates.length >= 2
+    ) {
       const distance = calculateDistance(
-        stop.geometry.coordinates[1],
-        stop.geometry.coordinates[0],
-        bus.geometry.coordinates[1],
-        bus.geometry.coordinates[0]
+        stopCoordinates[1],
+        stopCoordinates[0],
+        nearestBus.geometry.coordinates[1],
+        nearestBus.geometry.coordinates[0]
+      );
+      setDistance(distance);
+
+      const busSpeed = nearestBus.properties.speed || 30; // Assuming bus speed is in kilometers per hour
+      const estimatedTime = estimateTimeToReachStop(distance, busSpeed);
+      setEstimatedTime(estimatedTime);
+    } else {
+      console.error(
+        "Cannot calculate distance and estimated time. Nearest bus data is incomplete."
+      );
+    }
+  };
+
+  const findNearestBus = (stopCoordinates) => {
+    let nearestDistance = Infinity;
+    let nearestBus = null;
+
+    busesData.forEach((bus) => {
+      const busCoordinates = bus.geometry.coordinates;
+      const distance = Math.sqrt(
+        Math.pow(stopCoordinates[0] - busCoordinates[0], 2) +
+          Math.pow(stopCoordinates[1] - busCoordinates[1], 2)
       );
 
-      if (distance <= 5) {
-        // Considering only buses within 5 km radius
-        buses.push({
-          id: bus.properties.id,
-          route: bus.properties.route,
-          bearing: bus.properties.bearing,
-          licensePlate: bus.properties.license_plate,
-          distance: distance.toFixed(2),
-          estimatedTime: estimateTimeToReachStop(
-            distance,
-            bus.properties.speed || 30
-          ),
-        });
+      if (distance < nearestDistance) {
+        nearestDistance = distance;
+        nearestBus = bus;
       }
     });
 
-    return buses.slice(0, 4); // Return at most 4 nearest buses
+    return nearestBus;
   };
 
   const calculateDistance = (lat1, lon1, lat2, lon2) => {
@@ -116,42 +215,214 @@ function StopsData() {
     return timeInMinutes;
   };
 
-  const handleStopClick = (stopId) => {
-    const stop = stopData.find((stop) => stop.properties.id === stopId);
-    if (stop) {
-      setSelectedStop(stop);
-      const nearbyBuses = findNearestBuses(stop);
-      setNearestBuses(nearbyBuses);
-    }
+  {
+    /* Function to get the next stop based on the route and direction */
+  }
+
+  const getNextStop = (route, bearing) => {
+    // Find the route data for the current route
+    const currentRoute = routesData.find(
+      (routeData) => routeData.short_name === route
+    );
+
+    // Determine the appropriate headline based on the bus's bearing
+    const headline =
+      bearing === 0 ? currentRoute.headline[0] : currentRoute.headline[1];
+
+    return headline;
   };
+
+  // Filter stops data
+
+  const [filteredStops, setFilteredStops] = useState([]);
+  // Function to filter stops based on proximity to user's location
+  const filterNearbyStops = (
+    stops,
+    userLatitude,
+    userLongitude
+    // radius = 50
+  ) => {
+    return stops.filter((stop) => {
+      // Calculate distance between stop and user's location
+      const distanceThreshold = 1;
+      const distance = calculateDistance(
+        userLatitude,
+        userLongitude,
+        stop.geometry.coordinates[0],
+        stop.geometry.coordinates[1]
+      );
+      // Return true if the distance is within the specified radius
+      return distance <= distanceThreshold;
+    });
+  };
+
+  // Search Functionality
+  const [searchInput, setSearchInput] = useState("");
+  const [filterSearchValue, setFilterSearchValue] = useState([]);
+
+  const searchStops = (e) => {
+    const keyValue = e.target.value;
+    setSearchInput(keyValue);
+
+    const filterSearchResults = stopData.filter((product) =>
+      product.properties.name.toLowerCase().includes(keyValue.toLowerCase())
+    );
+
+    setFilterSearchValue(filterSearchResults);
+  };
+
+  const [close, setClose] = useState(true);
+  const [nearestIsOpen, setNearestIsOpen] = useState(true);
 
   return (
     <div>
-      <h2>All Stops</h2>
-      <select onChange={(event) => handleStopClick(event.target.value)}>
-        {stopData.map((stop) => (
-          <option key={stop.properties.id} value={stop.properties.id}>
-            {stop.properties.name}
-          </option>
-        ))}
-      </select>
+      <div className="main_heading">
+        <h2>Real Time Bus Tracking</h2>
+      </div>
+      <div className="stopsData_buttons_container">
+        <div className="button">
+          <button onClick={() => setClose(false)}>All Stops</button>
+        </div>
+        <div className="button">
+          <button onClick={() => setNearestIsOpen(false)}>Nearest Stop</button>
+        </div>
+      </div>
+      {!close ? (
+        <div className="allStops_data">
+          <h3>All stops list</h3>
+          <i class="material-symbols-outlined" onClick={() => setClose(true)}>
+            close
+          </i>
+          <input
+            type="text"
+            value={searchInput}
+            onChange={searchStops}
+            placeholder="search any stop..."
+          />
+          {filterSearchValue.length > 0 ? (
+            filterSearchValue.map((stopNames, index) => (
+              <p
+                key={index}
+                onClick={() =>
+                  handleStopClick(
+                    stopNames.properties.id,
+                    stopNames.properties.name
+                  )
+                }
+              >
+                {stopNames.properties.name}
+              </p>
+            ))
+          ) : (
+            <h4>No results match your search.</h4>
+          )}
+        </div>
+      ) : null}
+      {!nearestIsOpen ? (
+        <div className="nearestStops_data">
+          <h3>Nearest stops list</h3>
 
-      <h1>Nearest Buses Details</h1>
-      <ul>
-        {nearestBuses.length > 0 ? (
-          nearestBuses.map((bus) => (
-            <li key={bus.id}>
-              <p>Route: {bus.route}</p>
-              <p>Direction: {bus.bearing === 0 ? "Up" : "Down"}</p>
-              <p>License Plate: {bus.licensePlate}</p>
-              <p>Distance to stop: {bus.distance} km</p>
-              <p>Estimated time to reach stop: {bus.estimatedTime} minutes</p>
-            </li>
-          ))
+          <i
+            class="material-symbols-outlined"
+            onClick={() => setNearestIsOpen(true)}
+          >
+            close
+          </i>
+          <input type="text" />
+          {
+            filteredStops.map((f_stops, index) => (
+              <p key={index}>{f_stops.properties.name}</p>
+            ))
+          }
+        </div>
+      ) : null}
+      {/* <div className="searchInput_Button">
+        <h2>Search Your Stops</h2>
+        <input
+          type="text"
+          onChange={searchStops}
+          value={searchInput}
+          placeholder="Search Stops..."
+        />
+        <div className="searchResults">
+          {searchInput !== undefined && searchInput.trim() !== "" ? (
+            filterSearchValue.length > 0 ? (
+              filterSearchValue.map((stopNames, index) => (
+                <p
+                  key={index}
+                  onClick={() =>
+                    handleStopClick(
+                      stopNames.properties.id,
+                      stopNames.properties.name
+                    )
+                  }
+                >
+                  {stopNames.properties.name}
+                </p>
+              ))
+            ) : (
+              <h4>No results match your search.</h4>
+            )
+          ) : null}
+        </div>
+      </div> */}
+      {/* <h2>All Stops</h2> */}
+      {/* <select onChange={(event) => handleStopClick(event.target.value)}>
+        {stopData !== null ? (
+          stopData.length > 0 ? (
+            stopData.map((stop) => (
+              <option key={stop.properties.id} value={stop.properties.id}>
+                {stop.properties.name}
+              </option>
+            ))
+          ) : (
+            <option defaultValue="Please Wait...">Please Wait...</option>
+          )
         ) : (
-          <li>No buses found nearby.</li>
+          <option disabled>Please wait...</option>
         )}
-      </ul>
+      </select> */}
+      <br /> <br />
+      <h2>Stops According to your location</h2>
+      <select onChange={(event) => handleStopClick(event.target.value)}>
+        {filteredStops !== null ? (
+          filteredStops.length > 0 ? (
+            filteredStops.map((stop) => (
+              <option key={stop.properties.id} value={stop.properties.id}>
+                {stop.properties.name}
+              </option>
+            ))
+          ) : (
+            <option defaultValue="Make Sure Your Location Is On?">
+              Make Sure Your Location Is On?
+            </option>
+          )
+        ) : (
+          <option disabled selected>
+            Please wait...
+          </option>
+        )}
+      </select>
+      <h2 className="bus_details">Nearest Bus Details</h2>
+      {nearestBus ? (
+        <div>
+          <p>Route: {nearestBus.properties.route}</p>
+          {/* <p>Direction: {nearestBus.properties.bearing === 0 ? "Up" : "Down"}</p> */}
+          <p>
+            Direction:{" "}
+            {getNextStop(
+              nearestBus.properties.route,
+              nearestBus.properties.bearing
+            )}
+          </p>
+          <p>License Plate: {nearestBus.properties.license_plate}</p>
+          <p>Distance to stop: {distance.toFixed(2)} km</p>
+          <p>Estimated time to reach stop: {estimatedTime} minutes</p>
+          {/* Display the next stop based on the bus's bearing and direction names */}
+        </div>
+      ) : (
+        <p>Please select any stop...</p>
+      )}
     </div>
   );
 }

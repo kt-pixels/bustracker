@@ -3,8 +3,10 @@ import ReactDOM from 'react-dom/client'
 import App from './App.jsx'
 import './index.css'
 import { Route, RouterProvider, createBrowserRouter, createRoutesFromElements } from 'react-router-dom'
+// import StopsData from './components/NearestStopes.jsx'
 // import StopsData from './components/Map.jsx'
 import StopsData from './components/StopsData.jsx'
+
 // import NearestStopes from './components/NearestStopes.jsx'
 
 
