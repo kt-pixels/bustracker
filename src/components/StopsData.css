@@ -37,12 +37,6 @@ select{
     border-top: 1px solid;
 }
 
-.searchResults{
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 10px;
-}
-
 .searchResults > p{
     margin: 5px;
     padding: 8px;

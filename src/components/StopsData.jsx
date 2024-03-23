@@ -285,7 +285,7 @@ function StopsData() {
           placeholder="Search Stops..."
         />
         <div className="searchResults">
-          {searchInput.trim() !== "" ? (
+          {searchInput !== undefined && searchInput.trim() !== "" ? (
             filterSearchValue.length > 0 ? (
               filterSearchValue.map((stopNames, index) => (
                 <p
