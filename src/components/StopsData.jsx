@@ -147,52 +147,66 @@ function StopsData() {
   };
 
   const handleStopClickBuses = (stopCoordinates) => {
-    const nearestBus = findNearestBus(stopCoordinates);
-    setNearestBus(nearestBus);
-
-    if (
-      nearestBus &&
-      nearestBus.geometry &&
-      nearestBus.geometry.coordinates &&
-      nearestBus.geometry.coordinates.length >= 2
-    ) {
-      const distance = calculateDistance(
-        stopCoordinates[1],
-        stopCoordinates[0],
-        nearestBus.geometry.coordinates[1],
-        nearestBus.geometry.coordinates[0]
-      );
-      setDistance(distance);
-
-      const busSpeed = nearestBus.properties.speed || 30; // Assuming bus speed is in kilometers per hour
-      const estimatedTime = estimateTimeToReachStop(distance, busSpeed);
-      setEstimatedTime(estimatedTime);
+    const nearestBuses = findNearestBus(stopCoordinates, 3); // Fetch data for 3 nearest buses
+  
+    if (nearestBuses.length > 0) {
+      // Calculate distance and estimated time for each nearest bus
+      const updatedBuses = nearestBuses.map(bus => {
+        const distance = calculateDistance(
+          stopCoordinates[1],
+          stopCoordinates[0],
+          bus.geometry.coordinates[1],
+          bus.geometry.coordinates[0]
+        );
+        const busSpeed = bus.properties.speed || 30; // Assuming bus speed is in kilometers per hour
+        const estimatedTime = estimateTimeToReachStop(distance, busSpeed);
+  
+        // Return updated bus object with distance and estimated time
+        return { ...bus, distance, estimatedTime };
+      });
+  
+      // Update the state with modified nearestBuses array
+      setNearestBus(updatedBuses);
     } else {
-      console.error(
-        "Cannot calculate distance and estimated time. Nearest bus data is incomplete."
-      );
+      console.error("No nearest buses found.");
     }
   };
-
-  const findNearestBus = (stopCoordinates) => {
-    let nearestDistance = Infinity;
-    let nearestBus = null;
-
-    busesData.forEach((bus) => {
-      const busCoordinates = bus.geometry.coordinates;
-      const distance = Math.sqrt(
-        Math.pow(stopCoordinates[0] - busCoordinates[0], 2) +
-          Math.pow(stopCoordinates[1] - busCoordinates[1], 2)
-      );
-
-      if (distance < nearestDistance) {
-        nearestDistance = distance;
-        nearestBus = bus;
-      }
-    });
-
-    return nearestBus;
+  
+  
+  const findNearestBus = (stopCoordinates, count) => {
+    let nearestBuses = [];
+  
+    if (busesData.length > 0) {
+      busesData.forEach((bus) => {
+        const busCoordinates = bus.geometry.coordinates;
+        const distance = calculateDistance(
+          stopCoordinates[1],
+          stopCoordinates[0],
+          busCoordinates[1],
+          busCoordinates[0]
+        );
+  
+        // Add bus to the nearestBuses array if it is one of the closest buses
+        if (nearestBuses.length < count) {
+          nearestBuses.push({ ...bus, distance });
+        } else {
+          const farthestBusIndex = nearestBuses.reduce((maxIndex, currentBus, index, array) =>
+            currentBus.distance > array[maxIndex].distance ? index : maxIndex, 0);
+  
+          if (distance < nearestBuses[farthestBusIndex].distance) {
+            nearestBuses[farthestBusIndex] = { ...bus, distance };
+          }
+        }
+      });
+    } else {
+      console.error("No buses data available.");
+    }
+  
+    return nearestBuses;
   };
+  
+  
+  
 
   const calculateDistance = (lat1, lon1, lat2, lon2) => {
     const R = 6371; // Radius of the Earth in kilometers
@@ -225,12 +239,16 @@ function StopsData() {
       (routeData) => routeData.short_name === route
     );
 
-    // Determine the appropriate headline based on the bus's bearing
-    const headline =
-      bearing === 0 ? currentRoute.headline[0] : currentRoute.headline[1];
+    // Check if currentRoute exists before accessing its properties
+    if (currentRoute) {
+      // Determine the appropriate headline based on the bus's bearing
+      return bearing === 0 ? currentRoute.headline[0] : currentRoute.headline[1];
+    } else {
+      // Return a default message if currentRoute is undefined
+      return "Unknown";
+    }
+};
 
-    return headline;
-  };
 
   // Filter stops data
 
@@ -339,10 +357,9 @@ function StopsData() {
         )}
       </select>
       <h2 className="bus_details">Nearest Bus Details</h2>
-      {nearestBus ? (
+      {/* {nearestBus ? (
         <div>
           <p>Route: {nearestBus.properties.route}</p>
-          {/* <p>Direction: {nearestBus.properties.bearing === 0 ? "Up" : "Down"}</p> */}
           <p>
             Direction:{" "}
             {getNextStop(
@@ -353,11 +370,33 @@ function StopsData() {
           <p>License Plate: {nearestBus.properties.license_plate}</p>
           <p>Distance to stop: {distance.toFixed(2)} km</p>
           <p>Estimated time to reach stop: {estimatedTime} minutes</p>
-          {/* Display the next stop based on the bus's bearing and direction names */}
         </div>
       ) : (
         <p>Please select any stop...</p>
-      )}
+      )} */}
+
+{nearestBus && nearestBus.length > 0 ? (
+  nearestBus.map((bus, index) => (
+    <div key={index} className="bus_details">
+      <h3>Bus {index + 1}</h3>
+      <p>Route: {bus.properties.route}</p>
+      <p>
+            Direction:{" "}
+            {getNextStop(
+              bus.properties.route,
+              bus.properties.bearing
+            )}
+          </p>
+      {/* Display distance and estimated time */}
+      <p>Distance to stop: {bus.distance !== undefined ? `${bus.distance.toFixed(2)} km` : 'N/A'}</p>
+      <p>Estimated time to reach stop: {bus.estimatedTime !== undefined ? `${bus.estimatedTime} minutes` : 'N/A'}</p>
+    </div>
+  ))
+) : (
+  <p>No buses found near the stop.</p>
+)}
+
+
     </div>
   );
 }
