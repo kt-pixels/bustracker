@@ -38,7 +38,7 @@ function StopsData() {
   // ...
 
   useEffect(() => {
-    console.log("UseEffetc is working")
+    console.log("UseEffetc is working");
     GetStopsData();
     GetRoutesData();
     GetBusesData();
@@ -172,6 +172,7 @@ function StopsData() {
     }
   };
 
+
   const findNearestBus = (stopCoordinates) => {
     let nearestDistance = Infinity;
     let nearestBus = null;
@@ -191,6 +192,7 @@ function StopsData() {
 
     return nearestBus;
   };
+
 
   const calculateDistance = (lat1, lon1, lat2, lon2) => {
     const R = 6371; // Radius of the Earth in kilometers
@@ -254,49 +256,49 @@ function StopsData() {
     });
   };
 
-  // Inside the useEffect hook where you fetch stop data
-  // useEffect(() => {
-  //   if (userLatitude !== null && userLongitude !== null) {
-  //     const nearbyStops = filterNearbyStops(
-  //       stopData,
-  //       userLatitude,
-  //       userLongitude
-  //     );
-  //     setFilteredStops(nearbyStops);
-  //   }
-  // }, [userLatitude, userLongitude]);
-
+  
   return (
     <div>
-      <h2>Stops</h2>
-      {/* <select onChange={(event) => handleStopClick(event.target.value)}>
-        {stopData ? (
-          stopData.map((stop) => (
-            <option key={stop.properties.id} value={stop.properties.id}>
-              {stop.properties.name}
-            </option>
-          ))
-        ) : (
-          <option disabled>Please wait...</option>
-        )}
-      </select> */}
-
+      <h2>All Stops</h2>
       <select onChange={(event) => handleStopClick(event.target.value)}>
-        {filteredStops ? (
-          filteredStops.map((stop) => (
-            <option key={stop.properties.id} value={stop.properties.id}>
-              {stop.properties.name}
-            </option>
-          ))
+        {stopData !== null ? (
+          stopData.length > 0 ? (
+            stopData.map((stop) => (
+              <option key={stop.properties.id} value={stop.properties.id}>
+                {stop.properties.name}
+              </option>
+            ))
+          ) : (
+            <option defaultValue="Please Wait...">Please Wait...</option>
+          )
         ) : (
           <option disabled>Please wait...</option>
         )}
       </select>
-
-      <h1>Nearest Bus</h1>
-      {nearestBus && (
+      <br /> <br />
+      <h2>Stops According to your location</h2>
+      <select onChange={(event) => handleStopClick(event.target.value)}>
+        {filteredStops !== null ? (
+          filteredStops.length > 0 ? (
+            filteredStops.map((stop) => (
+              <option key={stop.properties.id} value={stop.properties.id}>
+                {stop.properties.name}
+              </option>
+            ))
+          ) : (
+            <option defaultValue="Make Sure Your Location Is On?">
+              Make Sure Your Location Is On?
+            </option>
+          )
+        ) : (
+          <option disabled selected>
+            Please wait...
+          </option>
+        )}
+      </select>
+      <h1>Nearest Bus Details</h1>
+      {nearestBus ? (
         <div>
-          <h2>Nearest Bus Details</h2>
           <p>Route: {nearestBus.properties.route}</p>
           {/* <p>Direction: {nearestBus.properties.bearing === 0 ? "Up" : "Down"}</p> */}
           <p>
@@ -311,6 +313,8 @@ function StopsData() {
           <p>Estimated time to reach stop: {estimatedTime} minutes</p>
           {/* Display the next stop based on the bus's bearing and direction names */}
         </div>
+      ) : (
+        <p>Please select any stop...</p>
       )}
     </div>
   );

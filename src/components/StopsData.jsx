@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from "react";
+import './StopsData.css'
 
 function StopsData() {
   const [stopData, setStopData] = useState([]);
@@ -19,11 +20,11 @@ function StopsData() {
   geo.getCurrentPosition(getCurrentLocation);
 
   function getCurrentLocation(position) {
-    // const userLat = position.coords.latitude;
-    // const userLng = position.coords.longitude;
+    const userLat = position.coords.latitude;
+    const userLng = position.coords.longitude;
 
-    const userLat = 26.83098;
-    const userLng = 45.1348;
+    // const userLat = 26.83098;
+    // const userLng = 45.1348;
 
     setUserLatitude(userLat);
     setUserLongitude(userLng);
@@ -70,8 +71,6 @@ function StopsData() {
     };
   }, [nearestBus, selectedStop, userLatitude, userLongitude]);
 
-  
-
   const GetStopsData = async () => {
     // Fetch stop data
     try {
@@ -117,10 +116,11 @@ function StopsData() {
     }
   };
 
-  const handleStopClick = (stopId) => {
+  const handleStopClick = (stopId, searchStopName) => {
     const selectedStop = stopData.find((stop) => stop.properties.id === stopId);
     if (selectedStop) {
       setSelectedStop(selectedStop); // Set selectedStop here
+      setSearchInput(searchStopName)
       const stopName = selectedStop.properties.name;
       const stopRoutes = routesData.filter((route) => {
         return (
@@ -256,20 +256,51 @@ function StopsData() {
     });
   };
 
-  // Inside the useEffect hook where you fetch stop data
-  // useEffect(() => {
-  //   if (userLatitude !== null && userLongitude !== null) {
-  //     const nearbyStops = filterNearbyStops(
-  //       stopData,
-  //       userLatitude,
-  //       userLongitude
-  //     );
-  //     setFilteredStops(nearbyStops);
-  //   }
-  // }, [userLatitude, userLongitude]);
+  // Search Functionality
+  const [searchInput, setSearchInput] = useState("");
+  const [filterSearchValue, setFilterSearchValue] = useState([]);
+
+  const searchStops = (e) => {
+    const keyValue = e.target.value;
+    setSearchInput(keyValue);
+
+    const filterSearchResults = stopData.filter((product) =>
+      product.properties.name.toLowerCase().includes(keyValue.toLowerCase())
+    );
+
+    setFilterSearchValue(filterSearchResults);
+  };
 
   return (
     <div>
+      <div className="main_heading">
+        <h2>Real Time Bus Tracking</h2>
+      </div>
+      <div className="searchInput_Button">
+        <h2>Search Your Stops</h2>
+        <input
+          type="text"
+          onChange={searchStops}
+          value={searchInput}
+          placeholder="Search Stops..."
+        />
+        <div className="searchResults">
+          {searchInput.trim() !== "" ? (
+            filterSearchValue.length > 0 ? (
+              filterSearchValue.map((stopNames, index) => (
+                <p
+                  key={index}
+                  onClick={() => handleStopClick(stopNames.properties.id, stopNames.properties.name)}
+                >
+                  {stopNames.properties.name}
+                </p>
+              ))
+            ) : (
+              <h4>No results match your search.</h4>
+            )
+          ) : null}
+        </div>
+      </div>
       <h2>All Stops</h2>
       <select onChange={(event) => handleStopClick(event.target.value)}>
         {stopData !== null ? (
@@ -286,9 +317,7 @@ function StopsData() {
           <option disabled>Please wait...</option>
         )}
       </select>
-
       <br /> <br />
-
       <h2>Stops According to your location</h2>
       <select onChange={(event) => handleStopClick(event.target.value)}>
         {filteredStops !== null ? (
@@ -309,12 +338,7 @@ function StopsData() {
           </option>
         )}
       </select>
-      <h1>Nearest Bus Details</h1>
-      {/* {
-        selectedStop.map((name, index) => (
-          <div key={index} style={{display: "flex", alignItems: "baseline", gap: 10}}><h3>Stop Name:</h3> <p>{name.properties.name}</p></div>
-        ))
-      }  */}
+      <h2 className="bus_details">Nearest Bus Details</h2>
       {nearestBus ? (
         <div>
           <p>Route: {nearestBus.properties.route}</p>
