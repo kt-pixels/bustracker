@@ -335,7 +335,7 @@ useEffect(() => {
           ) : null}
         </div>
       </div>
-      <h2>Stops According to your location</h2>
+      <h2>Nearest Stops</h2>
       <select onChange={(event) => handleStopClick(event.target.value)}>
       <option value="">--SELECT--</option>
         {filteredStops !== null ? (
