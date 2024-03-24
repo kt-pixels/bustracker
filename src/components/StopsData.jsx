@@ -97,7 +97,6 @@ function StopsData() {
       setFilteredStops(stopData);
     }
   }, [userLatitude, userLongitude, stopData]);
-  
 
   const GetStopsData = async () => {
     // Fetch stop data
@@ -148,7 +147,7 @@ function StopsData() {
     const selectedStop = stopData.find((stop) => stop.properties.id === stopId);
     if (selectedStop) {
       setSelectedStop(selectedStop); // Set selectedStop here
-      setSearchInput(searchStopName);
+      // setSearchInput(searchStopName);
       const stopName = selectedStop.properties.name;
       const stopRoutes = routesData.filter((route) => {
         return (
@@ -159,9 +158,9 @@ function StopsData() {
       });
       setSelectedStopRoutes(stopRoutes);
 
-      setIsShowingStops(true);
+      setIsShowingStops(false);
 
-      setFilterSearchValue([])
+      setFilterSearchValue([]);
 
       // Check if geometry exists and has coordinates
       if (
@@ -295,7 +294,7 @@ function StopsData() {
     const keyValue = e.target.value;
     setSearchInput(keyValue);
 
-    const filterSearchResults = stopData.filter((product) =>
+    const filterSearchResults = filteredStops.filter((product) =>
       product.properties.name.toLowerCase().includes(keyValue.toLowerCase())
     );
 
@@ -318,110 +317,112 @@ function StopsData() {
 
   return (
     <div>
-      {/* <div className="main_heading">
-        <h2>Real Time Bus Tracking</h2>
-      </div> */}
-      <div className="searchInput_Button">
-        {/* <h2>Search Your Stops</h2> */}
-        <span class="material-symbols-outlined search_icon" aria-hidden="true">search</span>
-        <input
-          type="text"
-          onChange={searchStops}
-          value={searchInput}
-          placeholder="Search Stops..."
-        />
-        <div className="searchResults">
-          {searchInput !== undefined && searchInput.trim() !== "" ? (
-            filterSearchValue.length > 0 ? (
-              filterSearchValue.map((stopNames, index) => (
-                <p
-                  key={index}
-                  onClick={() =>
-                    handleStopClick(
-                      stopNames.properties.id,
-                      stopNames.properties.name
-                    )
-                  }
-                >
-                  {stopNames.properties.name}
-                </p>
-              ))
-            ) : (
-              ""
-            )
-          ) : null}
-        </div>
-      </div>
-      <h2
-        className="nearest_stop_list"
-        title="Stops List, Button"
-        onClick={() => setIsShowingStops(!isShowingStops)}
-      >
-        Nearest Stops{" "}
-        <span class="material-symbols-outlined" aria-hidden="true">
-          keyboard_arrow_down
-        </span>
-      </h2>
-      {isShowingStops === false ? (
-        <div className="nearest_stops_data_container">
-          {filteredStops.map((f_stops) => (
-            <p
-              key={f_stops.properties.id}
-              className={
-                selectedStop === f_stops.properties.id
-                  ? `f_stops_lists active`
-                  : `f_stops_lists`
-              }
-              onClick={() => handleStopClick(f_stops.properties.id, f_stops.properties.name)}
-            >
-              {f_stops.properties.name}
-            </p>
-          ))}
+      {isShowingStops === true ? (
+        <div className="searchInput_Button">
+          {/* <h2>Search Your Stops</h2> */}
+          <span
+            class="material-symbols-outlined search_icon"
+            aria-hidden="true"
+          >
+            search
+          </span>
+          <input
+            type="text"
+            onChange={searchStops}
+            value={searchInput}
+            placeholder="Search Stops..."
+          />
+          <div className="searchResults">
+            {searchInput !== undefined && searchInput.trim() !== ""
+              ? filterSearchValue.length > 0
+                ? filterSearchValue.map((stopNames, index) => (
+                    <p
+                      key={index}
+                      onClick={() =>
+                        handleStopClick(
+                          stopNames.properties.id,
+                          stopNames.properties.name
+                        )
+                      }
+                    >
+                      {stopNames.properties.name}{" "} (
+                {stopNames.distance.toFixed(2)} km)
+                    </p>
+                  ))
+                : ""
+              : filteredStops.map((stopNames, index) => (
+                  <p
+                    key={index}
+                    onClick={() =>
+                      handleStopClick(
+                        stopNames.properties.id,
+                        stopNames.properties.name
+                      )
+                    }
+                  >
+                    {stopNames.properties.name}{" "}(
+                {stopNames.distance.toFixed(2)} km)
+                  </p>
+                ))}
+          </div>
         </div>
       ) : null}
-      <h2 className="bus_details" aria-live="assertive">
-        Nearest Bus Details
-        <span
-          class="material-symbols-outlined"
-          title="Refresh Data, Button"
-          style={{
-            background: "black",
-            borderRadius: 5,
-            color: "white",
-          }}
-          onClick={handleRefreshIsClick}
-        >
-          refresh
-        </span>
-      </h2>
-      <div className="start_stop_btns">
-        <button onClick={handleStartIsClick}>Auto Refresh Start</button>
-        <button onClick={handleStopIsClick}>Auto Refresh Stop</button>
-      </div>
-
-      {nearestBus && nearestBus.length > 0 ? (
-        nearestBus.map((bus, index) => (
-          <div key={index} className="buses_details">
-            <h3>Bus {index + 1}</h3>
-            <p>
-              <b>Route:</b> {bus.properties.route}
-            </p>
-            <p>
-              <b>Direction:</b>{" "}
-              {getNextStop(bus.properties.route, bus.properties.bearing)}
-            </p>
-            {/* Display distance and estimated time */}
-            <p>
-              <b>Distance to stop:</b>{" "}
-              {bus.distance !== undefined
-                ? `${bus.distance.toFixed(2)} km`
-                : "N/A"}
-            </p>
+      {isShowingStops === false ? (
+        <div className="buses_details_container">
+          <div className="title_container">
+            <div className="title_bk">
+              <div className="back_arrow" title="Back Button" onClick={() => setIsShowingStops(true)}>
+                <span class="material-symbols-outlined" aria-hidden="true">
+                  keyboard_backspace
+                </span>
+              </div>
+              <h2 className="bus_details" aria-live="polite">
+                Nearest Bus Details
+              </h2>
+            </div>
+            <span
+              class="material-symbols-outlined"
+              title="Refresh Data, Button"
+              style={{
+                background: "black",
+                borderRadius: 5,
+                color: "white",
+              }}
+              onClick={handleRefreshIsClick}
+            >
+              refresh
+            </span>
           </div>
-        ))
-      ) : (
-        <p className="no_buses_found">No buses found near the stop.</p>
-      )}
+          <div className="start_stop_btns">
+            <button onClick={handleStartIsClick}>Auto Refresh Start</button>
+            <button onClick={handleStopIsClick}>Auto Refresh Stop</button>
+          </div>
+
+          {nearestBus && nearestBus.length > 0 ? (
+            nearestBus.map((bus, index) => (
+              <div key={index} className="buses_details">
+                <h3>Bus {index + 1}</h3>
+                <p>
+                  <b>Route:</b> {bus.properties.route}
+                </p>
+                <p>
+                  <b>Direction:</b>{" "}
+                  {getNextStop(bus.properties.route, bus.properties.bearing)}
+                </p>
+                {/* Display distance and estimated time */}
+                <p>
+                  <b>Distance to stop:</b>{" "}
+                  {bus.distance !== undefined
+                    ? `${bus.distance.toFixed(2)} km`
+                    : "N/A"}
+                </p>
+              </div>
+            ))
+          ) : (
+            <p className="no_buses_found">No buses found near the stop.</p>
+          )}
+        </div>
+      ) : null}
     </div>
   );
 }
