@@ -1,94 +1,171 @@
-body{
-    font-family: math;
+body {
+    font-family: "Inter", sans-serif;
+  background-color: #efefef;
+
 }
 
-h2{
-    font-size: 20px;
+h2 {
+  font-size: 20px;
 }
 
-.main_heading > h2{
-    text-align: center;
-    font-family: math;
-    margin-block-end: 10px;
-    padding-block-end: 10px;
-    border-bottom: 1px solid black;
+.main_heading > h2 {
+  text-align: center;
+  font-family: math;
+  margin-block-end: 10px;
+  padding-block-end: 10px;
+  border-bottom: 1px solid black;
 }
 
-.searchInput_Button{
-    display: flex;
-    flex-direction: column;
+.searchInput_Button {
+  display: flex;
+  flex-direction: column;
 }
 
-.searchInput_Button > h2{
-    margin-block-start: 0;
+.searchInput_Button > h2 {
+  margin-block-start: 0;
 }
 
 /* .searchInput_Button > input{
     width: 100%;
 } */
 
-select{
-    width: 100%;
+select {
+  width: 100%;
 }
 
-.bus_details{
+.no_buses_found{
     text-align: center;
-    padding-block-start: 20px;
-    border-top: 1px solid;
 }
 
-.searchResults > p{
-    margin: 5px;
-    padding: 8px;
-    border-radius: 10px;
-    background: #adadad;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    text-align: center;
-    font-size: 14px;
+.bus_details {
+  padding-block-start: 20px;
+  border-top: 1px solid #b3b3b3;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
 }
 
-.searchResults > h4{
-    width: 321%;
-    display: flex;
-    align-items: center;
+.searchResults > p {
+  margin: 5px;
+  padding: 8px;
+  border-radius: 10px;
+  background: #adadad;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  font-size: 14px;
 }
 
-.allStops_data{
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
+.searchResults > h4 {
+  width: 321%;
+  display: flex;
+  align-items: center;
+}
+
+.allStops_data {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: white;
+  text-align: center;
+}
+
+.allStops_data > h3 {
+  background-color: black;
+  margin: 0;
+  padding: 15px;
+  color: white;
+}
+
+.allStops_data > p {
+  margin: 0;
+  padding: 10px;
+  border-bottom: 1px solid;
+}
+
+.allStops_data > .material-symbols-outlined {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  color: white;
+}
+
+.allStops_data > input {
+  width: 90%;
+  padding: 5px;
+  margin-block-start: 5px;
+  border-radius: 10px;
+  border-color: #b9b9b9;
+}
+
+.searchInput_Button > input {
+  font-size: 16px;
+  padding: 12px 20px 12px 40px;
+  border: 1px solid #ddd;
+  margin-bottom: 12px;
+}
+
+.searchInput_Button > .search_icon {
+  position: absolute;
+  top: 18px;
+  left: 14px;
+  color: gray;
+}
+.nearest_stop_list{
+  background-color: dimgray;
+  color: white;
+  padding: 5px;
+  border-radius: 10px;
+  font-size: 17px;
+  text-align: center;
+  margin-block-start: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.f_stops_lists{
+    margin: 0;
+    padding-block: 10px;
+    border-bottom: 1px solid gray;
+}
+
+.f_stops_lists.active{
+    background-color: gray;
+}
+
+.buses_details{
     background-color: white;
-    text-align: center;
-}
-
-.allStops_data > h3{
-    background-color: black;
-    margin: 0;
-    padding: 15px;
-    color: white;
-}
-
-.allStops_data > p{
-    margin: 0;
-    padding: 10px;
-    border-bottom: 1px solid;
-}
-
-.allStops_data > .material-symbols-outlined{
-    position: absolute;
-    top: 10px;
-    right: 10px;
-    color: white;
-}
-
-.allStops_data > input{
-    width: 90%;
     padding: 5px;
-    margin-block-start: 5px;
-    border-radius: 10px;
-    border-color: #b9b9b9;
+    margin-block-end: 10px;
+}
+
+.buses_details > h3{
+    margin: 0;
+    padding: 5px;
+    text-align: center;
+    background-color: rgb(59, 59, 59);
+    color: white;
+    text-transform: uppercase;
+}
+
+.start_stop_btns{
+    display: flex;
+    gap: 5px;
+    margin-block: 10px;
+    padding-block-end: 10px;
+    border-bottom: 1px solid gray;
+}
+
+.start_stop_btns > button{
+    flex: 1;
+    background-color: dimgray;
+    color: white;
+    font-size: 15px;
+    padding: 5px;
+    border: none;
+    border-radius: 6px;
 }
