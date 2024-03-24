@@ -7,11 +7,8 @@ function StopsData() {
   const [busesData, setBusesData] = useState([]);
   const [selectedStopRoutes, setSelectedStopRoutes] = useState([]);
   const [nearestBus, setNearestBus] = useState(null);
-  // const [distance, setDistance] = useState(null);
-  // const [estimatedTime, setEstimatedTime] = useState(null);
   const [selectedStop, setSelectedStop] = useState(selectedStopRoutes);
   const [filteredStops, setFilteredStops] = useState([]);
-  const [isSearchIsShowingStops, setIsSearchIsShowingStops] = useState(true);
 
   const [isIntervalRunning, setIsIntervalRunning] = useState(false);
   const [shouldRefreshBusesData, setShouldRefreshBusesData] = useState(false);
@@ -25,11 +22,11 @@ function StopsData() {
   geo.getCurrentPosition(getCurrentLocation);
 
   function getCurrentLocation(position) {
-    // const userLat = position.coords.latitude;
-    // const userLng = position.coords.longitude;
+    const userLat = position.coords.latitude;
+    const userLng = position.coords.longitude;
 
-    const userLat = 26.84959;
-    const userLng = 45.13501999999999;
+    // const userLat = 26.84959;
+    // const userLng = 45.13501999999999;
 
     setUserLatitude(userLat);
     setUserLongitude(userLng);
@@ -95,8 +92,12 @@ function StopsData() {
         (a, b) => a.distance - b.distance
       );
       setFilteredStops(sortedStops);
+    } else {
+      // If location is not available, show all stops without sorting
+      setFilteredStops(stopData);
     }
   }, [userLatitude, userLongitude, stopData]);
+  
 
   const GetStopsData = async () => {
     // Fetch stop data
@@ -322,7 +323,7 @@ function StopsData() {
       </div> */}
       <div className="searchInput_Button">
         {/* <h2>Search Your Stops</h2> */}
-        <span class="material-symbols-outlined search_icon">search</span>
+        <span class="material-symbols-outlined search_icon" aria-hidden="true">search</span>
         <input
           type="text"
           onChange={searchStops}
@@ -378,7 +379,7 @@ function StopsData() {
           ))}
         </div>
       ) : null}
-      <h2 className="bus_details">
+      <h2 className="bus_details" aria-live="assertive">
         Nearest Bus Details
         <span
           class="material-symbols-outlined"
