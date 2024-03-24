@@ -23,15 +23,16 @@ function StopsData() {
     // const userLat = position.coords.latitude;
     // const userLng = position.coords.longitude;
 
-    const userLat = 26.83098;
-    const userLng = 45.1348;
+    const userLat = 26.84959;
+    const userLng = 45.13501999999999;
+    // 26.84959, 45.13501999999999
 
     setUserLatitude(userLat);
     setUserLongitude(userLng);
 
     // Update filtered stops based on new location
-    const nearbyStops = filterNearbyStops(stopData, userLat, userLng);
-    setFilteredStops(nearbyStops);
+    // const nearbyStops = filterNearbyStops(stopData, userLat, userLng);
+    // setFilteredStops(nearbyStops);
   }
 
   const [intervalId, setIntervalId] = useState(null);
@@ -44,14 +45,14 @@ function StopsData() {
     GetRoutesData();
     GetBusesData();
 
-    if (userLatitude !== null && userLongitude !== null) {
-      const nearbyStops = filterNearbyStops(
-        stopData,
-        userLatitude,
-        userLongitude
-      );
-      setFilteredStops(nearbyStops);
-    }
+    // if (userLatitude !== null && userLongitude !== null) {
+    //   const nearbyStops = filterNearbyStops(
+    //     stopData,
+    //     userLatitude,
+    //     userLongitude
+    //   );
+    //   setFilteredStops(nearbyStops);
+    // }
 
     const runInterval = () => {
       if (
@@ -69,7 +70,20 @@ function StopsData() {
     return () => {
       clearInterval(intervalId);
     };
-  }, [nearestBus, selectedStop, userLatitude, userLongitude]);
+  }, [nearestBus, selectedStop]);
+
+  // useEffect hook to sort stops based on distance when user's location changes
+useEffect(() => {
+  if (userLatitude !== null && userLongitude !== null) {
+    // Calculate distance for each stop and sort them
+    const stopsWithDistance = stopData.map(stop => {
+      const distance = calculateDistance(userLatitude, userLongitude, stop.geometry.coordinates[0], stop.geometry.coordinates[1]);
+      return { ...stop, distance };
+    });
+    const sortedStops = stopsWithDistance.sort((a, b) => a.distance - b.distance);
+    setFilteredStops(sortedStops);
+  }
+}, [userLatitude, userLongitude, stopData]);
 
   const GetStopsData = async () => {
     // Fetch stop data
@@ -120,7 +134,7 @@ function StopsData() {
     const selectedStop = stopData.find((stop) => stop.properties.id === stopId);
     if (selectedStop) {
       setSelectedStop(selectedStop); // Set selectedStop here
-      setSearchInput(searchStopName)
+      setSearchInput(searchStopName);
       const stopName = selectedStop.properties.name;
       const stopRoutes = routesData.filter((route) => {
         return (
@@ -130,7 +144,7 @@ function StopsData() {
         );
       });
       setSelectedStopRoutes(stopRoutes);
-
+  
       // Check if geometry exists and has coordinates
       if (
         selectedStop.geometry &&
@@ -158,15 +172,17 @@ function StopsData() {
           bus.geometry.coordinates[1],
           bus.geometry.coordinates[0]
         );
-        const busSpeed = bus.properties.speed || 30; // Assuming bus speed is in kilometers per hour
-        const estimatedTime = estimateTimeToReachStop(distance, busSpeed);
+        // const busSpeed = bus.properties.speed || 30; // Assuming bus speed is in kilometers per hour
+        // const estimatedTime = estimateTimeToReachStop(distance, busSpeed);
   
         // Return updated bus object with distance and estimated time
-        return { ...bus, distance, estimatedTime };
+        return { ...bus, distance };
       });
+
+      const sortedBuses = updatedBuses.sort((a, b) => a.distance - b.distance);
   
       // Update the state with modified nearestBuses array
-      setNearestBus(updatedBuses);
+      setNearestBus(sortedBuses);
     } else {
       console.error("No nearest buses found.");
     }
@@ -223,11 +239,11 @@ function StopsData() {
     return distance;
   };
 
-  const estimateTimeToReachStop = (distance, speed) => {
-    const timeInHours = distance / speed; // Time in hours
-    const timeInMinutes = Math.round(timeInHours * 60); // Convert time from hours to minutes and round it to nearest integer
-    return timeInMinutes;
-  };
+  // const estimateTimeToReachStop = (distance, speed) => {
+  //   const timeInHours = distance / speed; // Time in hours
+  //   const timeInMinutes = Math.round(timeInHours * 60); // Convert time from hours to minutes and round it to nearest integer
+  //   return timeInMinutes;
+  // };
 
   {
     /* Function to get the next stop based on the route and direction */
@@ -319,25 +335,9 @@ function StopsData() {
           ) : null}
         </div>
       </div>
-      <h2>All Stops</h2>
-      <select onChange={(event) => handleStopClick(event.target.value)}>
-        {stopData !== null ? (
-          stopData.length > 0 ? (
-            stopData.map((stop) => (
-              <option key={stop.properties.id} value={stop.properties.id}>
-                {stop.properties.name}
-              </option>
-            ))
-          ) : (
-            <option defaultValue="Please Wait...">Please Wait...</option>
-          )
-        ) : (
-          <option disabled>Please wait...</option>
-        )}
-      </select>
-      <br /> <br />
       <h2>Stops According to your location</h2>
       <select onChange={(event) => handleStopClick(event.target.value)}>
+      <option value="">--SELECT--</option>
         {filteredStops !== null ? (
           filteredStops.length > 0 ? (
             filteredStops.map((stop) => (
@@ -389,7 +389,6 @@ function StopsData() {
           </p>
       {/* Display distance and estimated time */}
       <p>Distance to stop: {bus.distance !== undefined ? `${bus.distance.toFixed(2)} km` : 'N/A'}</p>
-      <p>Estimated time to reach stop: {bus.estimatedTime !== undefined ? `${bus.estimatedTime} minutes` : 'N/A'}</p>
     </div>
   ))
 ) : (
