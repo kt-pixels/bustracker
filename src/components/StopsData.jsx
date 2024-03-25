@@ -240,20 +240,6 @@ function StopsData() {
     return nearestBuses;
   };
 
-  // const calculateDistance = (lat1, lon1, lat2, lon2) => {
-  //   const R = 6371; // Radius of the Earth in kilometers
-  //   const dLat = (lat2 - lat1) * (Math.PI / 180);
-  //   const dLon = (lon2 - lon1) * (Math.PI / 180);
-  //   const a =
-  //     Math.sin(dLat / 2) * Math.sin(dLat / 2) +
-  //     Math.cos(lat1 * (Math.PI / 180)) *
-  //       Math.cos(lat2 * (Math.PI / 180)) *
-  //       Math.sin(dLon / 2) *
-  //       Math.sin(dLon / 2);
-  //   const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-  //   const distance = R * c;
-  //   return distance;
-  // };
 
   const calculateDistance = (lat1, lon1, lat2, lon2) => {
     const point1 = new window.google.maps.LatLng(lat1, lon1);
@@ -315,6 +301,27 @@ function StopsData() {
     setShouldRefreshBusesData(true);
   };
 
+  const backButtonClick = () => {
+    // Agar isShowingStops true hai aur user ne location provide ki hui hai
+    if (isShowingStops === true && (userLatitude !== null || userLongitude !== null)) {
+        // Do nothing, website refresh na ho
+    }
+    // Agar isShowingStops true hai lekin user ne location provide nahi ki hui hai
+    else if (isShowingStops === true && (userLatitude === null || userLongitude === null)) {
+        // Do nothing, website refresh na ho
+    }
+    // Agar isShowingStops false hai aur user ne location provide nahi ki hui hai
+    else if (isShowingStops === false && (userLatitude === null || userLongitude === null)) {
+        // Do nothing, website refresh na ho
+        location.reload();
+    }
+    // Agar isShowingStops false hai aur user ne location provide ki hui hai
+    else if (isShowingStops === false && (userLatitude !== null || userLongitude !== null)) {
+        // Kare refresh
+    }
+    setIsShowingStops(true)
+}
+
   return (
     <div>
       {isShowingStops === true ? (
@@ -375,7 +382,7 @@ function StopsData() {
         <div className="buses_details_container">
           <div className="title_container">
             <div className="title_bk">
-              <div className="back_arrow" title="Back Button" onClick={() => setIsShowingStops(true)}>
+              <div className="back_arrow" title="Back Button" onClick={backButtonClick}>
                 <span class="material-symbols-outlined" aria-hidden="true">
                   keyboard_backspace
                 </span>
