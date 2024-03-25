@@ -404,10 +404,10 @@ function StopsData() {
             }
           </select>
         </div>
-        <div className="buses_details_container">
+        <div className="buses_details_container" aria-live="assertive">
           <div className="title_container">
             <div className="title_bk">
-              <h2 className="bus_details" aria-live="polite">
+              <h2 className="bus_details">
                 Nearest Bus Details
               </h2>
             </div>
