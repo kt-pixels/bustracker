@@ -360,8 +360,12 @@ function StopsData() {
                       )
                     }
                   >
-                    {stopNames.properties.name}{" "}(
-                {stopNames.distance.toFixed(2)} km)
+                    {stopNames.properties.name}{" "}
+                    {/* (
+                {stopNames.distance.toFixed(2)} km) */}
+                {
+                  userLatitude !== null || userLongitude !== null ? `( ${(stopNames.distance.toFixed(2))} )` : "( Distance N/A )"
+                }
                   </p>
                 ))}
           </div>
