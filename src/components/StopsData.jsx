@@ -158,9 +158,11 @@ function StopsData() {
       });
       setSelectedStopRoutes(stopRoutes);
 
-      setIsShowingStops(false);
+      // setIsShowingStops(false);
 
       setFilterSearchValue([]);
+
+      setSearchInput("")
 
       // Check if geometry exists and has coordinates
       if (
@@ -287,44 +289,74 @@ function StopsData() {
     setFilterSearchValue(filterSearchResults);
   };
 
-  const [isShowingStops, setIsShowingStops] = useState(true);
+  // const [isShowingStops, setIsShowingStops] = useState(true);
+
+  const [messageToast, setMessageToast] = useState("")
+  const [showMessage, setShowMessage] = useState(false);
 
   const handleStartIsClick = () => {
     setIsIntervalRunning(true);
+
+    var message = 'Auto Refresh Start';
+
+    // Display message
+    // alert(message);
+    setMessageToast(message)
+    setShowMessage(true);
+
+    // Convert message to speech
+    var speechSynthesis = window.speechSynthesis;
+    var speechMessage = new SpeechSynthesisUtterance(message);
+    speechSynthesis.speak(speechMessage);
+
+    setTimeout(() => {
+      setShowMessage(false);
+    }, 1);
   };
 
   const handleStopIsClick = () => {
     setIsIntervalRunning(false);
+
+    var message = 'Auto Refresh Stop';
+
+    // Display message
+    // alert(message);
+    setMessageToast(message)
+    setShowMessage(true);
+
+    // Convert message to speech
+    var speechSynthesis = window.speechSynthesis;
+    var speechMessage = new SpeechSynthesisUtterance(message);
+    speechSynthesis.speak(speechMessage);
+
+    setTimeout(() => {
+      setShowMessage(false);
+    }, 1);
   };
 
   const handleRefreshIsClick = () => {
     setShouldRefreshBusesData(true);
-  };
 
-  const backButtonClick = () => {
-    // Agar isShowingStops true hai aur user ne location provide ki hui hai
-    if (isShowingStops === true && (userLatitude !== null || userLongitude !== null)) {
-        // Do nothing, website refresh na ho
-    }
-    // Agar isShowingStops true hai lekin user ne location provide nahi ki hui hai
-    else if (isShowingStops === true && (userLatitude === null || userLongitude === null)) {
-        // Do nothing, website refresh na ho
-    }
-    // Agar isShowingStops false hai aur user ne location provide nahi ki hui hai
-    else if (isShowingStops === false && (userLatitude === null || userLongitude === null)) {
-        // Do nothing, website refresh na ho
-        location.reload();
-    }
-    // Agar isShowingStops false hai aur user ne location provide ki hui hai
-    else if (isShowingStops === false && (userLatitude !== null || userLongitude !== null)) {
-        // Kare refresh
-    }
-    setIsShowingStops(true)
-}
+    var message = 'Refresh';
+
+    // Display message
+    // alert(message);
+    setMessageToast(message)
+    setShowMessage(true);
+
+    // Convert message to speech
+    var speechSynthesis = window.speechSynthesis;
+    var speechMessage = new SpeechSynthesisUtterance(message);
+    speechSynthesis.speak(speechMessage);
+
+    setTimeout(() => {
+      setShowMessage(false);
+    }, 1);
+  };
 
   return (
     <div>
-      {isShowingStops === true ? (
+      {/* {isShowingStops === true ? ( */}
         <div className="searchInput_Button">
           {/* <h2>Search Your Stops</h2> */}
           <span
@@ -339,6 +371,7 @@ function StopsData() {
             value={searchInput}
             placeholder="Search Stops..."
           />
+          {showMessage && <div style={{display: "none"}}>{messageToast}</div>}
           <div className="searchResults">
             {searchInput !== undefined && searchInput.trim() !== ""
               ? filterSearchValue.length > 0
@@ -357,36 +390,23 @@ function StopsData() {
                     </p>
                   ))
                 : ""
-              : filteredStops.map((stopNames, index) => (
-                  <p
-                    key={index}
-                    onClick={() =>
-                      handleStopClick(
-                        stopNames.properties.id,
-                        stopNames.properties.name
-                      )
-                    }
-                  >
-                    {stopNames.properties.name}{" "}
-                    {/* (
-                {stopNames.distance.toFixed(2)} km) */}
-                {
-                  userLatitude !== null || userLongitude !== null ? `( ${(stopNames.distance.toFixed(2))} )` : "( Distance N/A )"
-                }
-                  </p>
-                ))}
+                : null
+              }
           </div>
         </div>
-      ) : null}
-      {isShowingStops === false ? (
+        <div className="">
+          <select onChange={(event) => handleStopClick(event.target.value)}>
+            <option value="">--SELECT--</option>
+            {
+              filteredStops.map((stops) => (
+                <option value={stops.properties.id} key={stops.properties.id}>{stops.properties.name}</option>
+              ))
+            }
+          </select>
+        </div>
         <div className="buses_details_container">
           <div className="title_container">
             <div className="title_bk">
-              <div className="back_arrow" title="Back Button" onClick={backButtonClick}>
-                <span class="material-symbols-outlined" aria-hidden="true">
-                  keyboard_backspace
-                </span>
-              </div>
               <h2 className="bus_details" aria-live="polite">
                 Nearest Bus Details
               </h2>
@@ -430,10 +450,9 @@ function StopsData() {
               </div>
             ))
           ) : (
-            <p className="no_buses_found">No buses found near the stop.</p>
+            <p className="no_buses_found">Please select any stop...</p>
           )}
         </div>
-      ) : null}
     </div>
   );
 }
