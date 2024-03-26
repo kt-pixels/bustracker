@@ -162,7 +162,7 @@ function StopsData() {
 
       setFilterSearchValue([]);
 
-      setSearchInput("")
+      setSearchInput("");
 
       // Check if geometry exists and has coordinates
       if (
@@ -242,7 +242,6 @@ function StopsData() {
     return nearestBuses;
   };
 
-
   const calculateDistance = (lat1, lon1, lat2, lon2) => {
     const point1 = new window.google.maps.LatLng(lat1, lon1);
     const point2 = new window.google.maps.LatLng(lat2, lon2);
@@ -291,17 +290,17 @@ function StopsData() {
 
   // const [isShowingStops, setIsShowingStops] = useState(true);
 
-  const [messageToast, setMessageToast] = useState("")
+  const [messageToast, setMessageToast] = useState("");
   const [showMessage, setShowMessage] = useState(false);
 
   const handleStartIsClick = () => {
     setIsIntervalRunning(true);
 
-    var message = 'Auto Refresh Start';
+    var message = "Auto Refresh Start";
 
     // Display message
     // alert(message);
-    setMessageToast(message)
+    setMessageToast(message);
     setShowMessage(true);
 
     // Convert message to speech
@@ -317,11 +316,11 @@ function StopsData() {
   const handleStopIsClick = () => {
     setIsIntervalRunning(false);
 
-    var message = 'Auto Refresh Stop';
+    var message = "Auto Refresh Stop";
 
     // Display message
     // alert(message);
-    setMessageToast(message)
+    setMessageToast(message);
     setShowMessage(true);
 
     // Convert message to speech
@@ -337,11 +336,11 @@ function StopsData() {
   const handleRefreshIsClick = () => {
     setShouldRefreshBusesData(true);
 
-    var message = 'Refresh';
+    var message = "Refresh";
 
     // Display message
     // alert(message);
-    setMessageToast(message)
+    setMessageToast(message);
     setShowMessage(true);
 
     // Convert message to speech
@@ -357,102 +356,110 @@ function StopsData() {
   return (
     <div>
       {/* {isShowingStops === true ? ( */}
-        <div className="searchInput_Button">
-          {/* <h2>Search Your Stops</h2> */}
-          <span
-            class="material-symbols-outlined search_icon"
-            aria-hidden="true"
-          >
-            search
-          </span>
-          <input
-            type="text"
-            onChange={searchStops}
-            value={searchInput}
-            placeholder="Search Stops..."
-          />
-          {showMessage && <div style={{display: "none"}}>{messageToast}</div>}
-          <div className="searchResults">
-            {searchInput !== undefined && searchInput.trim() !== ""
-              ? filterSearchValue.length > 0
-                ? filterSearchValue.map((stopNames, index) => (
-                    <p
-                      key={index}
-                      onClick={() =>
-                        handleStopClick(
-                          stopNames.properties.id,
-                          stopNames.properties.name
-                        )
-                      }
-                    >
-                      {stopNames.properties.name}{" "} (
-                {stopNames.distance.toFixed(2)} km)
-                    </p>
-                  ))
-                : ""
-                : null
-              }
-          </div>
-        </div>
-        <div className="">
-          <select onChange={(event) => handleStopClick(event.target.value)}>
-            <option value="">--SELECT--</option>
-            {
-              filteredStops.map((stops) => (
-                <option value={stops.properties.id} key={stops.properties.id}>{stops.properties.name}</option>
-              ))
-            }
-          </select>
-        </div>
-        <div className="buses_details_container" aria-live="assertive">
-          <div className="title_container">
-            <div className="title_bk">
-              <h2 className="bus_details">
-                Nearest Bus Details
-              </h2>
-            </div>
-            <span
-              class="material-symbols-outlined"
-              title="Refresh Data, Button"
-              style={{
-                background: "black",
-                borderRadius: 5,
-                color: "white",
-              }}
-              onClick={handleRefreshIsClick}
-            >
-              refresh
-            </span>
-          </div>
-          <div className="start_stop_btns">
-            <button onClick={handleStartIsClick}>Auto Refresh Start</button>
-            <button onClick={handleStopIsClick}>Auto Refresh Stop</button>
-          </div>
+      <div className="searchInput_Button">
+        {/* <h2>Search Your Stops</h2> */}
+        <span class="material-symbols-outlined search_icon" aria-hidden="true">
+          search
+        </span>
+        <input
+          type="text"
+          onChange={searchStops}
+          value={searchInput}
+          placeholder="Search Stops..."
+        />
+        {showMessage && <div style={{ display: "none" }}>{messageToast}</div>}
 
-          {nearestBus && nearestBus.length > 0 ? (
-            nearestBus.map((bus, index) => (
-              <div key={index} className="buses_details">
-                <h3>Bus {index + 1}</h3>
-                <p>
-                  <b>Route:</b> {bus.properties.route}
-                </p>
-                <p>
-                  <b>Direction:</b>{" "}
-                  {getNextStop(bus.properties.route, bus.properties.bearing)}
-                </p>
-                {/* Display distance and estimated time */}
-                <p>
-                  <b>Distance to stop:</b>{" "}
-                  {bus.distance !== undefined
-                    ? `${bus.distance.toFixed(2)} km`
-                    : "N/A"}
-                </p>
-              </div>
-            ))
-          ) : (
-            <p className="no_buses_found">Please select any stop...</p>
-          )}
+        <div className="searchResults">
+          {searchInput !== undefined && searchInput.trim() !== ""
+            ? filterSearchValue.length > 0
+              ? filterSearchValue.map((stopNames, index) => (
+                  <p
+                    key={index}
+                    onClick={() =>
+                      handleStopClick(
+                        stopNames.properties.id,
+                        stopNames.properties.name
+                      )
+                    }
+                  >
+                    {stopNames.properties.name} {" "} (
+                {stopNames.distance !== undefined
+                    ? stopNames.distance.toFixed(2)
+                    : "N/A"} km)
+                  </p>
+                ))
+              : ""
+            : null}
         </div>
+      </div>
+      <div className="">
+        <select onChange={(event) => handleStopClick(event.target.value)}>
+          <option value="">--SELECT--</option>
+          {filteredStops.map((stops) => (
+            <option value={stops.properties.id} key={stops.properties.id}>
+              {stops.properties.name} {" "} (
+                {stops.distance !== undefined
+                    ? stops.distance.toFixed(2)
+                    : "N/A"} km)
+            </option>
+          ))}
+        </select>
+      </div>
+      <div className="buses_details_container" aria-live="assertive">
+        <div className="title_container">
+          <div className="title_bk">
+            <h2 className="bus_details">Nearest Bus Details</h2>
+          </div>
+          <span
+            class="material-symbols-outlined"
+            title="Refresh Data, Button"
+            style={{
+              background: "black",
+              borderRadius: 5,
+              color: "white",
+            }}
+            onClick={handleRefreshIsClick}
+          >
+            refresh
+          </span>
+        </div>
+        <div className="start_stop_btns">
+          <button onClick={handleStartIsClick}>Auto Refresh Start</button>
+          <button onClick={handleStopIsClick}>Auto Refresh Stop</button>
+        </div>
+
+        {nearestBus && nearestBus.length > 0 ? (
+          nearestBus.map((bus, index) => (
+            <div key={index} className="buses_details">
+              <h3>Bus {index + 1}</h3>
+              <p>
+                <b>Route:</b> {bus.properties.route}
+              </p>
+              <p>
+                <b>Direction:</b>{" "}
+                {getNextStop(bus.properties.route, bus.properties.bearing)}
+              </p>
+              <p>
+                <b>Distance to stop:</b>{" "}
+                {bus.distance !== undefined
+                  ? `${bus.distance.toFixed(2)} km`
+                  : "N/A"}
+              </p>
+              {/* <p aria-live="assertive">
+                {bus.properties.route}
+                {" "}, {" "}
+                {getNextStop(bus.properties.route, bus.properties.bearing)}
+                {" "}, {" "}
+                {bus.distance !== undefined
+                  ? `${bus.distance.toFixed(2)} km`
+                  : "N/A"}
+              </p> */}
+            </div>
+          ))
+        ) : (
+          <p className="no_buses_found">Please select any stop...</p>
+        )}
+      </div>
     </div>
   );
 }

@@ -151,6 +151,10 @@ select {
   text-transform: uppercase;
 }
 
+.buses_details > p {
+  text-align: center;
+}
+
 .start_stop_btns {
   display: flex;
   gap: 5px;
