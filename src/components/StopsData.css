@@ -187,3 +187,12 @@ select {
     align-items: center;
     gap: 10px;
 }
+
+.center{
+  text-align: center;
+  letter-spacing: 1px;
+}
+
+.routes-container{
+  text-align: center;
+}
