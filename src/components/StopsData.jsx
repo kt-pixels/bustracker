@@ -13,8 +13,6 @@ function StopsData() {
   const [isIntervalRunning, setIsIntervalRunning] = useState(false);
   const [shouldRefreshBusesData, setShouldRefreshBusesData] = useState(false);
 
-  
-
   // GET THE USER CURRENT LOCATION
   const [userLatitude, setUserLatitude] = useState(null);
   const [userLongitude, setUserLongitude] = useState(null);
@@ -224,7 +222,6 @@ function StopsData() {
           busCoordinates[1],
           busCoordinates[0]
         );
-        
 
         // Add bus to the nearestBuses array if it is one of the closest buses
         if (nearestBuses.length < count) {
@@ -359,6 +356,19 @@ function StopsData() {
     }, 1);
   };
 
+  const isApproaching = (bus, stopCoordinates) => {
+    const busCoordinates = bus.geometry.coordinates;
+    // Calculate the distance between the bus and the stop
+    const distance = calculateDistance(
+      stopCoordinates[1],
+      stopCoordinates[0],
+      busCoordinates[1],
+      busCoordinates[0]
+    );
+    // Assuming the threshold for considering a bus as approaching is 2 km
+    return distance <= 20; // Adjust this threshold as needed
+  };
+
   return (
     <div>
       {/* {isShowingStops === true ? ( */}
@@ -388,10 +398,11 @@ function StopsData() {
                       )
                     }
                   >
-                    {stopNames.properties.name} {" "} (
-                {stopNames.distance !== undefined
-                    ? stopNames.distance.toFixed(2)
-                    : "N/A"} km)
+                    {stopNames.properties.name} (
+                    {stopNames.distance !== undefined
+                      ? stopNames.distance.toFixed(2)
+                      : "N/A"}{" "}
+                    km)
                   </p>
                 ))
               : ""
@@ -403,10 +414,9 @@ function StopsData() {
           <option value="">--SELECT--</option>
           {filteredStops.map((stops) => (
             <option value={stops.properties.id} key={stops.properties.id}>
-              {stops.properties.name} {" "} (
-                {stops.distance !== undefined
-                    ? stops.distance.toFixed(2)
-                    : "N/A"} km)
+              {stops.properties.name} (
+              {stops.distance !== undefined ? stops.distance.toFixed(2) : "N/A"}{" "}
+              km)
             </option>
           ))}
         </select>
@@ -434,24 +444,37 @@ function StopsData() {
           <button onClick={handleStopIsClick}>Auto Refresh Stop</button>
         </div>
 
+        <div>
+          {selectedStop && selectedStop.properties && (
+            <p style={{ fontSize: 20, textAlign: "center" }}>
+              Selected stop is {selectedStop.properties.name}
+            </p>
+          )}
+        </div>
+
         {nearestBus && nearestBus.length > 0 ? (
-          nearestBus.map((bus, index) => (
-            <div key={index} className="buses_details">
-              <h3>Bus {index + 1}</h3>
-              <p>
-                <b>Route:</b> {bus.properties.route}
-              </p>
-              <p>
-                <b>Direction:</b>{" "}
-                {getNextStop(bus.properties.route, bus.properties.bearing)}
-              </p>
-              <p>
-                <b>Distance to stop:</b>{" "}
-                {bus.distance !== undefined
-                  ? `${bus.distance.toFixed(2)} km`
-                  : "N/A"}
-              </p>
-              {/* <p aria-live="assertive">
+          // nearestBus.map((bus, index) => (
+          nearestBus
+            .filter((bus) =>
+              isApproaching(bus, selectedStop.geometry.coordinates)
+            )
+            .map((bus, index) => (
+              <div key={index} className="buses_details">
+                <h3>Bus {index + 1}</h3>
+                <p>
+                  <b>Route:</b> {bus.properties.route}
+                </p>
+                <p>
+                  <b>Direction:</b>{" "}
+                  {getNextStop(bus.properties.route, bus.properties.bearing)}
+                </p>
+                <p>
+                  <b>Distance to stop:</b>{" "}
+                  {bus.distance !== undefined
+                    ? `${bus.distance.toFixed(2)} km`
+                    : "N/A"}
+                </p>
+                {/* <p aria-live="assertive">
                 {bus.properties.route}
                 {" "}, {" "}
                 {getNextStop(bus.properties.route, bus.properties.bearing)}
@@ -460,8 +483,8 @@ function StopsData() {
                   ? `${bus.distance.toFixed(2)} km`
                   : "N/A"}
               </p> */}
-            </div>
-          ))
+              </div>
+            ))
         ) : (
           <p className="no_buses_found">Please select any stop...</p>
         )}
