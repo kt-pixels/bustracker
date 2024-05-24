@@ -19,18 +19,16 @@ function StopsData() {
 
   const geo = navigator.geolocation;
 
-  geo.getCurrentPosition(getCurrentLocation);
+geo.getCurrentPosition(getCurrentLocation);
 
-  function getCurrentLocation(position) {
-    const userLat = position.coords.latitude;
-    const userLng = position.coords.longitude;
+function getCurrentLocation(position) {
+  const userLat = position.coords.latitude;
+  const userLng = position.coords.longitude;
 
-    // const userLat = 26.84959;
-    // const userLng = 45.13501999999999;
+  setUserLatitude(userLat);
+  setUserLongitude(userLng);
+}
 
-    setUserLatitude(userLat);
-    setUserLongitude(userLng);
-  }
 
   const [intervalId, setIntervalId] = useState(null);
 
@@ -83,8 +81,8 @@ function StopsData() {
         const distance = calculateDistance(
           userLatitude,
           userLongitude,
-          stop.geometry.coordinates[0],
-          stop.geometry.coordinates[1]
+          stop.geometry.coordinates[1],
+          stop.geometry.coordinates[0]
         );
         return { ...stop, distance };
       });
@@ -248,14 +246,10 @@ function StopsData() {
   const calculateDistance = (lat1, lon1, lat2, lon2) => {
     const point1 = new window.google.maps.LatLng(lat1, lon1);
     const point2 = new window.google.maps.LatLng(lat2, lon2);
-    const distance =
-      window.google.maps.geometry.spherical.computeDistanceBetween(
-        point1,
-        point2
-      );
+    const distance = window.google.maps.geometry.spherical.computeDistanceBetween(point1, point2);
     return distance / 1000; // Convert distance to kilometers
   };
-
+  
   const getNextStop = (route, bearing) => {
     // Find the route data for the current route
     const currentRoute = routesData.find(
