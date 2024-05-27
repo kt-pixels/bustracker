@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 import "./StopsData.css";
+// import stopsRoutes from '../../stopsRoutes.json'
 
 function StopsData() {
   const [stopData, setStopData] = useState([]);
@@ -141,14 +142,23 @@ function getCurrentLocation(position) {
     }
   };
 
-  const handleStopClick = (stopId, searchStopName) => {
-    const selectedStop = stopData.find((stop) => stop.properties.id === stopId);
-    console.log("Clicked stop:", stopId, selectedStop.properties.name);
+  const handleStopClick = (stopPk) => {
+    const selectedStop = stopData.find((stop) => stop.properties.pk === stopPk);
+    console.log("Clicked stop:", stopPk, selectedStop.properties.name);
     if (selectedStop) {
       // setSearchInput(searchStopName);
       const stopName = selectedStop.properties.name;
+      const stopPk = selectedStop.properties.pk;
 
       setSelectedStop(selectedStop); // Set selectedStop here
+
+      // const stopRoutes = routesData.filter((route) => {
+      //   return (
+      //     route.extra_data &&
+      //     route.extra_data.headline &&
+      //     route.extra_data.headline[1].includes(stopName)
+      //   );
+      // });
 
       const stopRoutes = routesData.filter((route) => {
         return (
@@ -157,6 +167,7 @@ function getCurrentLocation(position) {
           route.extra_data.headline[1].includes(stopName)
         );
       });
+
       setSelectedStopRoutes(stopRoutes);
 
       // setIsShowingStops(false);
@@ -387,8 +398,7 @@ function getCurrentLocation(position) {
                     key={index}
                     onClick={() =>
                       handleStopClick(
-                        stopNames.properties.id,
-                        stopNames.properties.name
+                        stopNames.properties.pk
                       )
                     }
                   >
@@ -404,10 +414,10 @@ function getCurrentLocation(position) {
         </div>
       </div>
       <div className="">
-        <select onChange={(event) => handleStopClick(event.target.value)}>
+        <select onChange={(event) => handleStopClick(parseInt(event.target.value))}>
           <option value="">--SELECT--</option>
           {filteredStops.map((stops) => (
-            <option value={stops.properties.id} key={stops.properties.id}>
+            <option value={stops.properties.pk} key={stops.properties.pk}>
               {stops.properties.name} (
               {stops.distance !== undefined ? stops.distance.toFixed(2) : "N/A"}{" "}
               km)
